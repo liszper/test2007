@@ -1,0 +1,15 @@
+{:deps   {:aliases [:dev]}
+
+ :dev-http {5000 ["public" "public/app"]}
+
+ :builds {:app {:target           :browser
+                :devtools         {:preloads [dev.refresh]
+                                   :reload-strategy :full}
+                :output-dir "public/app"
+                :asset-path "/app"
+                :modules          {:main {:init-fn main.app/init}}
+                :compiler-options {:install-deps true}
+                :js-options 
+                {:js-provider :external
+                    :external-index "public/app/lib.js"
+                    :external-index-format :esm}}}}
