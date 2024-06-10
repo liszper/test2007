@@ -12,4 +12,5 @@
                 :js-options 
                 {:js-provider :external
                  :external-index "public/app/lib.js"   
-                 :external-index-format :esm}}}}
+                 :external-index-format :esm
+                 }}}}
