@@ -38,7 +38,7 @@
 
     (fn []
        
-      (when true
+      (when false;true
          
       (dispatch 
         [:wait 
@@ -56,9 +56,6 @@
           :log #(js/console.log (str "success:" (js->clj % :keywordize-keys true)))
           :catch #(js/console.log (str "Error: " (js->clj %)))}])
         )
-
-
-
 
       )
     
@@ -319,28 +316,24 @@
             :quaternion [qx qy qz qw]}]]   
          ))]))
 
-(defn player-control []
-  (let [
-        environment-map @(subscribe [:get-in [:environment :map]])
-        keyboard-controls
-        [{:keys ["ArrowUp" "KeyW"] :name "forward"}
-         {:keys ["ArrowDown" "KeyS"] :name "backward"}
-         {:keys ["ArrowLeft" "KeyA"] :name "leftward"}
-         {:keys ["ArrowRight" "KeyD"] :name "rightward"}
-         {:keys ["Space"] :name "jump"}
-         {:keys ["Shift"] :name "run"}]
-        ]
-       [:> drei/KeyboardControls {:map keyboard-controls}
-        [:> ecc/default (get-in maps [environment-map :control]) 
-         [:f> player]]
-      ]
-    )
-  )
+(def keyboard-controls
+  [{:keys ["ArrowUp" "KeyW"] :name "forward"}
+   {:keys ["ArrowDown" "KeyS"] :name "backward"}
+   {:keys ["ArrowLeft" "KeyA"] :name "leftward"}
+   {:keys ["ArrowRight" "KeyD"] :name "rightward"}
+   {:keys ["Space"] :name "jump"}
+   {:keys ["Shift"] :name "run"}])
 
 
 (defn dragons []
   [:<>
 
+[:> drei/Gltf
+    {:castShadow "castShadow"
+     :receiveShadow "receiveShadow"
+     :position [-100 10 0]
+     :scale 50
+     :src "/npc/mega_wyvern.glb"}]
    
 [:> drei/Gltf
     {:castShadow "castShadow"
@@ -360,23 +353,16 @@
       ;[:> drei/Fisheye {:zoom 0.4} 
         skybox
         lights
-      
-
-
-[:> drei/Gltf
-    {:castShadow "castShadow"
-     :receiveShadow "receiveShadow"
-     :position [-100 10 0]
-     :scale 50
-     :src "/npc/mega_wyvern.glb"}]
 
         [other-players] 
 
-        [other-player]     
+        ;[other-player]     
 
         [:> rapier/Physics physics
         
-         [player-control]
+         [:> drei/KeyboardControls {:map keyboard-controls}
+          [:> ecc/default (get-in maps [environment-map :control]) 
+           [:f> player]]]
          
          [:> rapier/RigidBody rigid-body [:> drei/Gltf gltf]]
         ]
@@ -433,16 +419,16 @@
          
            ;[:h1 "Account"] 
            ;[:h1 (get chain :name)] 
-           ;[:h4 "Position: x:"x" y:"y" z:"z]
+           [:h4 "Position: x:"x" y:"y" z:"z]
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
            [:f> connect-kit]
            ;(str guild-data)
-           ;(str players)
+           (str players)
        
            ;[:h1 "Skills"] 
            [:> SimpleGrid {:cols 3 :style {:height "50vh"}}
           
-            (when (= status "connected")
+            (when false ;(= status "connected")
             (for [{:keys [totalPoints rank guildPlatformId]} (keep #(when (= (:guildId %) 67432) %) points)]
               [:div
                [:> Badge {:size "xl"} 
