@@ -21,8 +21,8 @@ RUN         apt-get install -y nodejs
 
 RUN         npm install shadow-cljs -g
 RUN         npm install esbuild -g
-RUN         npm install babel -g
-RUN         npm install postcss -g
+RUN         npm install babel-cli -g
+RUN         npm install postcss-cli -g
 RUN         npm install esbuild -g
 RUN         npm install concurrently -g
 COPY        shadow-cljs.edn /root/shadow-cljs.edn
@@ -35,5 +35,5 @@ COPY        public   /root/public
 COPY        resources   /root/resources
 
 WORKDIR      /root
-CMD         ["npm", "install"]
+RUN         npm install
 CMD         ["npm", "run", "release"]
