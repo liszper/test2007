@@ -1,6 +1,7 @@
 
 (ns main.server
-  (:require ["express" :as express]
+  (:require ["node:process" :as process]
+            ["express" :as express]
             ["ws" :as ws]
             [cognitect.transit :as t]
             ))
@@ -14,7 +15,7 @@
         (.static express "public/app")
         ;(fn [req res] (.send res "Hello World"))
         )
-  (.listen app 5000)
+  (.listen app (or (.-PORT (.-env process)) 5000))
     
   (let [wss (new ws/WebSocketServer #js {:port 8080 :path "/join"})]
     
