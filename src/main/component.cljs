@@ -38,7 +38,7 @@
 
     (fn []
        
-      (when false
+      (when true
          
       (dispatch 
         [:wait 
@@ -341,12 +341,6 @@
 (defn dragons []
   [:<>
 
-[:> drei/Gltf
-    {:castShadow "castShadow"
-     :receiveShadow "receiveShadow"
-     :position [-100 10 0]
-     :scale 50
-     :src "/npc/mega_wyvern.glb"}]
    
 [:> drei/Gltf
     {:castShadow "castShadow"
@@ -366,8 +360,19 @@
       ;[:> drei/Fisheye {:zoom 0.4} 
         skybox
         lights
-       
-        [other-players]      
+      
+
+
+[:> drei/Gltf
+    {:castShadow "castShadow"
+     :receiveShadow "receiveShadow"
+     :position [-100 10 0]
+     :scale 50
+     :src "/npc/mega_wyvern.glb"}]
+
+        [other-players] 
+
+        [other-player]     
 
         [:> rapier/Physics physics
         
@@ -437,7 +442,7 @@
            ;[:h1 "Skills"] 
            [:> SimpleGrid {:cols 3 :style {:height "50vh"}}
           
-            (when false;(= status "connected")
+            (when (= status "connected")
             (for [{:keys [totalPoints rank guildPlatformId]} (keep #(when (= (:guildId %) 67432) %) points)]
               [:div
                [:> Badge {:size "xl"} 

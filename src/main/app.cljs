@@ -34,35 +34,6 @@
           (.catch (fn [x] (when (:catch opts) ((:catch opts) x))))))))
 (rf/reg-event-fx :wait (fn [{db :db} [_ opts]] {:wait (assoc opts :db db)}))
 
-(defonce do-timer (js/setInterval #(dispatch [:assoc-in [:time] (js/Date.)]) 1000))
-
-
-(defn clock []
-  (let [colour @(subscribe [:get-in [:time-color]])
-        time   (-> @(subscribe [:get-in [:time]])
-                   .toTimeString
-                   (clojure.string/split " ")
-                   first)]
-    [:div.example-clock {:style {:color colour}} time]))
-
-(defn color-input []
-  (let [gettext (fn [e] (-> e .-target .-value))
-        emit    (fn [e] (dispatch [:assoc-in [:time-color] (gettext e)]))]
-    [:div.color-input
-     "Display color: "
-     [:input {:type "text"
-              :style {:border "1px solid #CCC"}
-              :value @(subscribe [:get-in [:time-color]])
-              :on-change emit}]]))
-
-(defn test-ui
-  []
-  [:div
-   [:h1 "The time is now:"]
-   [clock]
-   [color-input]])
-
-
 (def wallet-connect-project-id "a1f553a67e9967aba78bc770c739bd61")
 (defonce query-client (new tanstack/QueryClient))
 (def config
