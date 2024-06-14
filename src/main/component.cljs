@@ -19,8 +19,6 @@
             ["@airstack/airstack-react" :as airstack] 
             
             ["../ecmascript/threejs" :refer [Box]]
-            ["../ecmascript/ecctrl" :refer [App]]
-            ["../ecmascript/config" :refer [signIntoGuild guildClient]]
             ))
 
 (defonce Guild (guild/createGuildClient "test"))

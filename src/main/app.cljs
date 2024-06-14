@@ -15,8 +15,6 @@
             ["wagmi/connectors" :refer [injected metaMask safe walletConnect]]
             ["@tanstack/react-query" :as tanstack]
 
-            ["../ecmascript/config" :refer [Config]]
-
             ["@airstack/airstack-react" :as airstack] 
             
             [main.component :refer [main]]))
@@ -65,11 +63,17 @@
    [color-input]])
 
 
+(def wallet-connect-project-id "a1f553a67e9967aba78bc770c739bd61")
 (defonce query-client (new tanstack/QueryClient))
+(def config
+  (wagmi/createConfig 
+    #js {:chains #js [mainnet] 
+         :connectors #js [(injected) (walletConnect #js {:projectId wallet-connect-project-id})]
+         :transports #js {"1" (wagmi/http)}}))
 
 (defn bundle []
   [:> MantineProvider
-   [:> wagmi/WagmiProvider {:config Config}
+   [:> wagmi/WagmiProvider {:config config}
     [:> tanstack/QueryClientProvider {:client query-client}
      [:> airstack/AirstackProvider {:apiKey ""}
       [:f> main]]]]])
