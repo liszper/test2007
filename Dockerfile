@@ -27,6 +27,8 @@ RUN         npm install esbuild -g
 COPY        shadow-cljs.edn /root/shadow-cljs.edn
 
 COPY        package.json /root/package.json
+COPY        deps.edn /root/deps.edn
+COPY        postcss.config.cjs /root/postcss.config.cjs
 COPY        src /root/src
 COPY        public   /root/public
 COPY        resources   /root/resources
