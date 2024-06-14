@@ -12,5 +12,12 @@
                 :js-options 
                 {:js-provider :external
                  :external-index "public/app/lib.js"   
-                 :external-index-format :esm
-                 }}}}
+                 :external-index-format :esm}}
+          
+          :server {:target :node-script
+                   :output-to "resources/server.js" 
+                   :main main.server/init
+                   ;:devtools {:after-load server.main/reset}
+                   ;:js-options {:js-package-dirs ["resources/backend/node_modules"]}
+                   }
+          }}

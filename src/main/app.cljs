@@ -7,6 +7,9 @@
     
             ["@mantine/core" :refer [MantineProvider]]
             
+            ["ws" :as WebSocket]
+            [cognitect.transit :as t]
+
             ["wagmi" :as wagmi]
             ["wagmi/chains" :refer [mainnet base]]
             ["wagmi/connectors" :refer [injected metaMask safe walletConnect]]
@@ -16,7 +19,7 @@
 
             ["@airstack/airstack-react" :as airstack] 
             
-            [main.component :refer [main canvas-test]]))
+            [main.component :refer [main]]))
 
 (rf/reg-event-db :reset (fn [_ [_ value]] value))
 (rf/reg-event-db :assoc-in (fn [db [_ path value]] (assoc-in db path value)))
@@ -32,7 +35,6 @@
                    (when (:log opts) ((:log opts) x))))
           (.catch (fn [x] (when (:catch opts) ((:catch opts) x))))))))
 (rf/reg-event-fx :wait (fn [{db :db} [_ opts]] {:wait (assoc opts :db db)}))
-
 
 (defonce do-timer (js/setInterval #(dispatch [:assoc-in [:time] (js/Date.)]) 1000))
 
@@ -72,11 +74,11 @@
      [:> airstack/AirstackProvider {:apiKey ""}
       [:f> main]]]]])
 
-(defn error-handler [info]
+(defn react-error-handler [info]
   [:p {:style {:color :red}} (str (.-error info))])
 
 (defn render-fn []
-  [:> ErrorBoundary {:FallbackComponent (fn [info] (reagent.core/as-element [error-handler info]))}    
+  [:> ErrorBoundary {:FallbackComponent (fn [info] (reagent.core/as-element [react-error-handler info]))}    
    [:f> bundle]
    ]
   )
@@ -90,11 +92,45 @@
   (rf/clear-subscription-cache!)
   (render))
 
+(def webs (atom nil))
+
+(rf/reg-fx :send (fn [opts] (.send @webs;(get-in opts [:db :websocket "join"])
+                                   (t/write (t/writer :json) (:message opts)))))
+(rf/reg-event-fx :send (fn [{db :db} [_ opts]] {:send {:message opts :db db}}))
+
+(defn ws-connect [path]
+  (let [uri (str "ws://localhost:8080/"path)
+        ws (new js/WebSocket uri)]
+    (dispatch [:assoc-in [:websocket uri] ws])
+    (reset! webs ws)
+    (set! (.-onmessage ws)
+          (fn [event]
+            (let [{:keys [id player position quaternion] :as data} (t/read (t/reader :json) (.-data event))]
+              (case id
+                "movement"
+                (dispatch [:assoc-in [:players (:located player) (:name player)]
+                         {:position position
+                          :quaternion quaternion
+                          }])
+                nil)
+              )
+            ;(.log js/console "received: %s" (t/read (t/reader :json) (.-data event)))
+            ))
+    (set! (.-onopen ws) (fn [] 
+                          (.log js/console "Websocket connection established.")
+                          ))
+    (set! (.-onerror ws) (.-error js/console))
+    ))
+
 (defn ^:export init []
+  
   (rf/dispatch-sync
     [:reset
-     {:time (js/Date.)
-      :time-color "orange"
+     {:environment {:map "Ethereum"}
       }])
+
   (render)
+
+  (ws-connect "join")
+  
   )
