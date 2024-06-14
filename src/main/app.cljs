@@ -102,10 +102,9 @@
                                    (t/write (t/writer :json) (:message opts)))))
 (rf/reg-event-fx :send (fn [{db :db} [_ opts]] {:send {:message opts :db db}}))
 
-(defn ws-connect [path]
-  (let [uri (str "ws://localhost:8080/"path)
-        ws (new js/WebSocket uri)]
-    (dispatch [:assoc-in [:websocket uri] ws])
+(defn ws-connect [uri]
+  (let [ws (new js/WebSocket uri)]
+    ;(dispatch [:assoc-in [:websocket uri] ws])
     (reset! webs ws)
     (set! (.-onmessage ws)
           (fn [event]
@@ -135,6 +134,6 @@
 
   (render)
 
-  (ws-connect "join")
+  (ws-connect "/join")
   
   )
