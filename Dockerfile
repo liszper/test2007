@@ -24,6 +24,7 @@ RUN         npm install esbuild -g
 RUN         npm install babel -g
 RUN         npm install postcss -g
 RUN         npm install esbuild -g
+RUN         npm install concurrently -g
 COPY        shadow-cljs.edn /root/shadow-cljs.edn
 
 COPY        package.json /root/package.json
