@@ -8,18 +8,15 @@
     "watch:css": "postcss src/css/app.css -w --dir public/app --verbose",
     "watch:clojurescript": "shadow-cljs watch app server",
     "watch:server": "node --watch resources/server.js",
-    
     "release:typescript": "babel src/react --out-dir src/ecmascript --extensions .ts,.tsx,.jsx",
     "release:css": "postcss src/css/app.css --dir public/app",
     "release:clojurescript": "shadow-cljs release app server",
-    
     "start": "conc -c auto npm:watch:*",
     "release": "conc -c auto npm:release:* && npm run bundle:optimize && node resources/server.js",
-    
+    "build": "npm run release",
     "bundle": "esbuild --bundle public/app/lib.js --outfile=public/app/lib.bundle.js",
     "watch:bundle": "npm run bundle -- --watch",
     "bundle:optimize": "npm run bundle --  --analyze --metafile=.bundle.meta.json --define:NODE_ENV=production --minify"
-    
   },
   "dependencies": {
     "@airstack/airstack-react": "^0.6.3",
@@ -46,6 +43,7 @@
     "react-refresh": "^0.13.0",
     "three": "^0.165.0",
     "viem": "^2.13.7",
+    "vite": "^5.3.1",
     "wagmi": "^2.9.10",
     "ws": "^8.17.0",
     "zustand": "^4.5.2"

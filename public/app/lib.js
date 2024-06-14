@@ -1,23 +1,23 @@
-import * as i0 from "ws";
-import * as i1 from "buffer";
-import * as i2 from "react-error-boundary";
-import * as i3 from "react-dom";
-import * as i4 from "@mantine/core";
-import * as i5 from "wagmi";
-import * as i6 from "@guildxyz/sdk";
-import * as i7 from "ecctrl";
-import * as i8 from "react-dom/client";
-import * as i9 from "@tanstack/react-query";
-import * as i10 from "@react-three/rapier";
-import * as i11 from "three";
-import * as i12 from "wagmi/chains";
-import * as i13 from "wagmi/connectors";
-import * as i14 from "@react-three/drei";
-import * as i15 from "@mantine/hooks";
-import * as i16 from "react";
-import * as i17 from "@react-three/fiber";
-import * as i18 from "@tabler/icons-react";
-import * as i19 from "@airstack/airstack-react";
+import "ws";
+import "buffer";
+import * as i0 from "react-error-boundary";
+import * as i1 from "react-dom";
+import * as i2 from "@mantine/core";
+import * as i3 from "wagmi";
+import * as i4 from "@guildxyz/sdk";
+import * as i5 from "ecctrl";
+import * as i6 from "react-dom/client";
+import * as i7 from "@tanstack/react-query";
+import * as i8 from "@react-three/rapier";
+import * as i9 from "three";
+import "wagmi/chains";
+import "wagmi/connectors";
+import * as i10 from "@react-three/drei";
+import "@mantine/hooks";
+import * as i11 from "react";
+import * as i12 from "@react-three/fiber";
+import "@tabler/icons-react";
+import * as i13 from "@airstack/airstack-react";
 
 const ALL = {};
 
@@ -30,42 +30,112 @@ globalThis.shadow$bridge = function(name) {
   }
 };
 
-ALL["ws"] = i0;
+ALL["ws"] = {
 
-ALL["buffer"] = i1;
+};
 
-ALL["react-error-boundary"] = i2;
+ALL["buffer"] = {
 
-ALL["react-dom"] = i3;
+};
 
-ALL["@mantine/core"] = i4;
+ALL["react-error-boundary"] = {
+  ErrorBoundary: i0.ErrorBoundary
+};
 
-ALL["wagmi"] = i5;
+ALL["react-dom"] = {
+  findDOMNode: i1.findDOMNode,
+  render: i1.render,
+  unmountComponentAtNode: i1.unmountComponentAtNode
+};
 
-ALL["@guildxyz/sdk"] = i6;
+ALL["@mantine/core"] = {
+  Button: i2.Button,
+  Grid: i2.Grid,
+  SimpleGrid: i2.SimpleGrid,
+  Flex: i2.Flex,
+  Badge: i2.Badge,
+  MantineProvider: i2.MantineProvider,
+  Stack: i2.Stack
+};
 
-ALL["ecctrl"] = i7;
+ALL["wagmi"] = {
+  useSignMessage: i3.useSignMessage,
+  useDisconnect: i3.useDisconnect,
+  useAccount: i3.useAccount,
+  WagmiProvider: i3.WagmiProvider,
+  useConnect: i3.useConnect,
+  useEnsName: i3.useEnsName
+};
 
-ALL["react-dom/client"] = i8;
+ALL["@guildxyz/sdk"] = {
+  createGuildClient: i4.createGuildClient,
+  createSigner: i4.createSigner
+};
 
-ALL["@tanstack/react-query"] = i9;
+ALL["ecctrl"] = {
+  default: i5.default
+};
 
-ALL["@react-three/rapier"] = i10;
+ALL["react-dom/client"] = {
+  createRoot: i6.createRoot,
+  hydrateRoot: i6.hydrateRoot
+};
 
-ALL["three"] = i11;
+ALL["@tanstack/react-query"] = {
+  QueryClientProvider: i7.QueryClientProvider,
+  QueryClient: i7.QueryClient
+};
 
-ALL["wagmi/chains"] = i12;
+ALL["@react-three/rapier"] = {
+  Physics: i8.Physics,
+  RigidBody: i8.RigidBody
+};
 
-ALL["wagmi/connectors"] = i13;
+ALL["three"] = {
+  Quaternion: i9.Quaternion,
+  Vector3: i9.Vector3
+};
 
-ALL["@react-three/drei"] = i14;
+ALL["wagmi/chains"] = {
 
-ALL["@mantine/hooks"] = i15;
+};
 
-ALL["react"] = i16;
+ALL["wagmi/connectors"] = {
 
-ALL["@react-three/fiber"] = i17;
+};
 
-ALL["@tabler/icons-react"] = i18;
+ALL["@react-three/drei"] = {
+  Html: i10.Html,
+  Stars: i10.Stars,
+  Gltf: i10.Gltf,
+  KeyboardControls: i10.KeyboardControls
+};
 
-ALL["@airstack/airstack-react"] = i19;
+ALL["@mantine/hooks"] = {
+
+};
+
+ALL["react"] = {
+  Children: i11.Children,
+  useRef: i11.useRef,
+  createElement: i11.createElement,
+  Fragment: i11.Fragment,
+  Suspense: i11.Suspense,
+  Component: i11.Component,
+  useEffect: i11.useEffect,
+  useState: i11.useState,
+  memo: i11.memo
+};
+
+ALL["@react-three/fiber"] = {
+  Canvas: i12.Canvas,
+  useFrame: i12.useFrame
+};
+
+ALL["@tabler/icons-react"] = {
+
+};
+
+ALL["@airstack/airstack-react"] = {
+  AirstackProvider: i13.AirstackProvider
+};
