@@ -11,7 +11,7 @@
             [cognitect.transit :as t]
 
             ["wagmi" :as wagmi]
-            ["wagmi/chains" :refer [mainnet base]]
+            ["wagmi/chains" :refer [mainnet base optimism polygon]]
             ["wagmi/connectors" :refer [injected metaMask safe walletConnect]]
             ["@tanstack/react-query" :as tanstack]
 
@@ -67,7 +67,7 @@
 (defonce query-client (new tanstack/QueryClient))
 (def config
   (wagmi/createConfig 
-    #js {:chains #js [mainnet] 
+    #js {:chains #js [mainnet base optimism polygon] 
          :connectors #js [(injected) (walletConnect #js {:projectId wallet-connect-project-id})]
          :transports #js {"1" (wagmi/http)}}))
 
