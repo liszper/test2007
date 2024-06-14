@@ -1,5 +1,2 @@
 [phases.build]
-cmds = [
-"npm install shadow-cljs -g"
-"npm install",
-"npm run release"]
+cmds = ["npm install shadow-cljs -g", "npm install", "npm run release"]
