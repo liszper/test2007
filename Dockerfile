@@ -31,4 +31,5 @@ COPY        public   /root/public
 COPY        resources   /root/resources
 
 WORKDIR      /root
-CMD         ["node", "resources/server.js"]
+CMD         ["npm", "install"]
+CMD         ["npm", "run", "release"]
