@@ -10,8 +10,11 @@
 (def app (express))
 
 (defn ^:export init []
-  ;(.get app "/" (fn [req res] (.send res "Hello World")))
-  ;(.listen app 3333)
+  (.use app "/"
+        (.static express "public/app")
+        ;(fn [req res] (.send res "Hello World"))
+        )
+  (.listen app 5000)
     
   (let [wss (new ws/WebSocketServer #js {:port 8080 :path "/join"})]
     

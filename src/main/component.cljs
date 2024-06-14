@@ -381,10 +381,10 @@
       ]]))
 
 (defn lobby []
-  (react/useEffect
-    (fn [] 
-      ;(js/console.log "Test component rendered..")
-      )) 
+  ;(react/useEffect
+  ;  (fn [] 
+  ;    (js/console.log "Test component rendered..")
+  ;    )) 
   [:> fiber/Canvas
    [:ambientLight {:intensity (/ (.-PI js/Math) 2)}]
       
@@ -394,10 +394,10 @@
   )
 
 (defn main []
-  (react/useEffect
-    (fn [] 
-      ;(js/console.log "Main component rendered..")
-      )) 
+  ;(react/useEffect
+  ;  (fn [] 
+  ;    (js/console.log "Main component rendered..")
+  ;    )) 
   (let [{:keys [address status chain chainId]} (js->clj (wagmi/useAccount) :keywordize-keys true)
         _ (dispatch [:assoc-in [:status] status])
         _ (dispatch [:assoc-in [:chain] chain])

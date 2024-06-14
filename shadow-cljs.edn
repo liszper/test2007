@@ -1,23 +1,32 @@
-{:deps   {:aliases [:dev]}
+{:deps {:aliases [:dev]}
 
- :dev-http {5000 ["public" "public/app"]}
+; :dev-http {5000 ["public" "public/app"]}
 
- :builds {:app {:target           :browser
-                :devtools         {:preloads [dev.refresh]
-                                   :reload-strategy :full}
-                :output-dir "public/app"
-                :asset-path "/app"
-                :modules          {:main {:init-fn main.app/init}}
-                :compiler-options {:install-deps true}
-                :js-options 
-                {:js-provider :external
-                 :external-index "public/app/lib.js"   
-                 :external-index-format :esm}}
-          
-          :server {:target :node-script
-                   :output-to "resources/server.js" 
-                   :main main.server/init
-                   ;:devtools {:after-load server.main/reset}
-                   ;:js-options {:js-package-dirs ["resources/backend/node_modules"]}
-                   }
-          }}
+ :builds 
+ {:app
+  {:target       :browser
+   :output-dir   "public/app"
+   :asset-path   "/app"
+   :modules     {:main {:init-fn main.app/init}}
+   
+   :js-options 
+   {:js-provider :external
+    :external-index "public/app/lib.js"   
+    :external-index-format :esm}
+   
+   :dev
+   {:devtools {:preloads [dev.refresh]
+               :reload-strategy :full}
+    :compiler-options {:install-deps true}}
+
+   :release
+   {:compiler-options {:optimizations :simple}}}
+
+  :server 
+  {:target :node-script
+   :output-to "resources/server.js" 
+   :main main.server/init
+   ;:devtools {:after-load server.main/reset}
+   ;:js-options {:js-package-dirs ["resources/backend/node_modules"]}
+   }
+  }}
