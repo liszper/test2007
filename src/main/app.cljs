@@ -11,7 +11,7 @@
             ["ws" :as WebSocket]
             [cognitect.transit :as t]
 
-            [main.component :refer [main]]))
+            [main.component :refer [main debug?]]))
 
 
 
@@ -93,8 +93,7 @@
 
   (ws-connect "/join")
 
-  (.addEventListener js/document "keydown" #(js/console.log %))
-
-  (.addEventListener js/document "keyup" #(js/console.log %))
+  (when debug? (.addEventListener js/document "keydown" #(js/console.log %)))
+  (when debug? (.addEventListener js/document "keyup" #(js/console.log %)))
   
   )

@@ -11,12 +11,11 @@
    {:gltf 
     {:castShadow "castShadow" 
      :receiveShadow "receiveShadow"
-     :position [0 0 0]
+     :position [0 -2 0]
      ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
      :scale 0.6
      :src "/maps/twin_peaks_black_lodge.glb"}
-    :control {:debug true
-              :maxVelLimit 5
+    :control {:maxVelLimit 5
               :sprintMult 4
               :jumpVel 8
               ;:airDragMultiplier 0.1
@@ -38,12 +37,11 @@
    {:gltf 
     {:castShadow "castShadow" 
      :receiveShadow "receiveShadow"
-     :position [0 0 -30]
+     :position [0 -2 -30]
      ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
      :scale 1
      :src "/maps/desert_sector.glb"}
-    :control {:debug true
-              :maxVelLimit 10
+    :control {:maxVelLimit 10
               :sprintMult 2
               :jumpVel 4
               ;:airDragMultiplier 0.1

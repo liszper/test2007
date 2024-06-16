@@ -26,6 +26,8 @@
             ["../ecmascript/threejs" :refer [Box]]
             ))
 
+(defonce debug? true)
+
 (defn player []
   (let [{:keys [x y z]} @(subscribe [:get-in [:player :position]])
         {:keys [qx qy qz qw]} @(subscribe [:get-in [:player :quaternion]])
@@ -131,11 +133,13 @@
 
         ;[other-player]     
 
-        [:> rapier/Physics {:timeStep "vary" :debug "debug"}
+        [:> rapier/Physics {:timeStep "vary" :debug (if debug? "debug" nil)}
         
-         [:> drei/KeyboardControls {:map keyboard-controls :debug? true :debug "debug"}
-          [:> ecc/default control
-           [:f> player]]]
+         [:> drei/KeyboardControls {:map keyboard-controls :debug? (if debug? true false) :debug "debug"}
+          ;[:> ecc/default (assoc control :debug debug?)
+           [:f> player]
+          ; ]
+          ]
          
          [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} [:> drei/Gltf gltf]]
         ]
@@ -192,12 +196,12 @@
          
            ;[:h1 "Account"] 
            ;[:h1 (get chain :name)] 
-           [:h4 "Position: x:"x" y:"y" z:"z]
-           [:> Button {:onClick #(dispatch [:send {:id "llama3" :message {:role "user" :content "Are you ready to play?"}}])} "Ask Llama3"]
+           (when debug? [:h4 "Position: x:"x" y:"y" z:"z])
+           ;[:> Button {:onClick #(dispatch [:send {:id "llama3" :message {:role "user" :content "Are you ready to play?"}}])} "Ask Llama3"]
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
            [:f> connect-kit]
            ;(str guild-data)
-           (str players)
+           (when debug? (str players))
        
        
            ;[:h1 "Skills"] 
