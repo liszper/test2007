@@ -1,5 +1,10 @@
+
 (ns main.component
-  (:require ["@mantine/core" :refer [AppShell Avatar Badge Burger Button createTheme Group SimpleGrid Grid Container Flex Stack Skeleton]]
+  (:require [main.maps :refer [maps]]
+            [main.models :refer [loading player-model]]
+            [main.wagmi :refer [connect-kit]]
+    
+            ["@mantine/core" :refer [AppShell Avatar Badge Burger Button createTheme Group SimpleGrid Grid Container Flex Stack Skeleton]]
             ["@mantine/hooks" :refer [useDisclosure]]
             ["@tabler/icons-react" :as icon]
 
@@ -20,219 +25,6 @@
             
             ["../ecmascript/threejs" :refer [Box]]
             ))
-
-(defonce Guild (guild/createGuildClient "test"))
-(defonce user-client (.-user Guild))
-(defonce guild-client (.-guild Guild))
-(defonce role-client (.-role Guild))
-(defonce reward-client (.-reward Guild))
-(defonce admin-client (.-admin Guild))
-
-(defn logged-in? [{:keys [address status guilds]}] 
-  (and address (= status "connected") 
-       (not guilds)
-       ))
-
-(defonce do-timer 
-  (js/setInterval
-
-    (fn []
-       
-      (when false;true
-         
-      (dispatch 
-        [:wait 
-         {:when logged-in? 
-          :fn (fn [{:keys [address signer-fn]}] (.getMemberships user-client address signer-fn))
-          :then #(dispatch [:assoc-in [:guilds :joined] (js->clj % :keywordize-keys true)]) ;bad design pattern
-          :log #(js/console.log (str "success:" (js->clj % :keywordize-keys true)))
-          :catch #(js/console.log (str "Error: " (js->clj %)))}])
-        
-      (dispatch 
-        [:wait 
-         {:when logged-in? 
-          :fn (fn [{:keys [address signer-fn]}] (.getPoints user-client address signer-fn))
-          :then #(dispatch [:assoc-in [:guilds :points] (js->clj % :keywordize-keys true)]) ;bad design pattern
-          :log #(js/console.log (str "success:" (js->clj % :keywordize-keys true)))
-          :catch #(js/console.log (str "Error: " (js->clj %)))}])
-        )
-
-      )
-    
-    10000))
-
-
-(defn connect-kit []
-  (react/useEffect
-    (fn []
-      (js/console.log "Connect kit rendered..")
-     )) 
-  (let [{:keys [address chain chainId]} (js->clj (wagmi/useAccount) :keywordize-keys true)
-        _ (dispatch [:assoc-in [:address] address])
-        sign-message (.-signMessageAsync (wagmi/useSignMessage))
-        signer (.custom guild/createSigner (fn [message] (sign-message #js {:message message})) address)
-        _ (when address (dispatch [:init-in [:signer-fn] signer]))
-        connect (.-connect (wagmi/useConnect))
-        ens-name (js->clj (wagmi/useEnsName #js {:address address}) :keywordize-keys true)
-        player-name (or (:data ens-name) address)
-        _ (dispatch [:assoc-in [:player :name] player-name])
-        disconnect (.-disconnect (wagmi/useDisconnect))
-        connectors (.-connectors (wagmi/useConnect))
-        signer (.-signMessageAsync (wagmi/useSignMessage))]    
-    
-    (if address
-     
-      [:> Flex {:gap "sm"}
-       ;[:p (str (js->clj guild-client))]
-       ;player-name 
-       [:> Button 
-          {:onClick #(disconnect)}
-          "Disconnect"]
-       ;[:f> signIntoGuild]
-       ]
-      
-      [:> Flex {:gap "sm"}
-       (for [connector connectors]
-         [:> Button 
-          {:key (.-id connector)
-           :onClick #(connect #js {:connector connector})}
-          (.-name connector)])])
-    ))
-
-
-(def maps
-  {
-   "Base"
-   {:gltf 
-    {:castShadow "castShadow" 
-     :receiveShadow "receiveShadow"
-     :position [0 0 0]
-     ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
-     :scale 0.6
-     :src "/maps/twin_peaks_black_lodge.glb"}
-    :rigid-body {:colliders "trimesh" :type "fixed"}
-    :physics {:timeStep "vary"}
-    :control {:maxVelLimit 5
-              :sprintMult 4
-              :jumpVel 8
-              ;:airDragMultiplier 0.1
-              ;:fallingGravityScale 10
-              :camInitDis -3}
-    :skybox [:> drei/Stars]
-    :lights [:<>
-       [:directionalLight {:intensity 1 :castShadow "castShadow" :position [0 10 0] :shadow-bias -0.0004}
-        [:orthographicCamera {:args [-20 20 20 -20] :attach "shadow-camera"}]]
-       [:ambientLight {:intensity 0.5}]
-   [:spotLight {:angle 0.15 :decay 0 :intensity (.-PI js/Math) :penumbra 1 :position [10 10 10]}]
-   [:pointLight {:decay 0 :intensity (.-PI js/Math) :position [(- 10) (- 10) (- 10)]}]
-             
-             
-             ]
-    }
-   
-   "Ethereum"
-   {:gltf 
-    {:castShadow "castShadow" 
-     :receiveShadow "receiveShadow"
-     :position [0 0 -30]
-     ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
-     :scale 1
-     :src "/maps/desert_sector.glb"}
-    :rigid-body {:colliders "trimesh" :type "fixed"}
-    :physics {:timeStep "vary"}
-    :control {:maxVelLimit 5
-              :sprintMult 2
-              :jumpVel 4
-              ;:airDragMultiplier 0.1
-              ;:fallingGravityScale 10
-              :camInitDis -3}
-    ;:skybox [:> drei/Stars]
-    ;:skybox [:> drei/Environment {:files "/psy.hdr" :ground {:scale 100}}]
-    :lights [:<>
-       ;[:directionalLight {:intensity 1 :castShadow "castShadow" :position [0 10 0] :shadow-bias -0.0004}
-       ; [:orthographicCamera {:args [-20 20 20 -20] :attach "shadow-camera"}]]
-       [:ambientLight {:intensity 3}]
-             
-             
-             ]
-    }
-
-   "Polygon"
-   {:gltf 
-    {:castShadow "castShadow" 
-     :receiveShadow "receiveShadow"
-     :position [0 -30 -30]
-     ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
-     :scale 10
-     :src "/maps/small_cybertown.glb"}
-    :rigid-body {:colliders "trimesh" :type "fixed"}
-    :physics {:timeStep "vary"}
-    :control {:maxVelLimit 5
-              :sprintMult 2
-              :jumpVel 9
-              ;:airDragMultiplier 0.1
-              ;:fallingGravityScale 10
-              :camInitDis -3}
-    ;:skybox [:> drei/Stars]
-    ;:skybox [:> drei/Environment {:files "/psy.hdr" :ground {:scale 100}}]
-    :lights [:<>
-       [:directionalLight {:intensity 1 :castShadow "castShadow" :position [0 10 0] :shadow-bias -0.0004}
-        [:orthographicCamera {:args [-20 20 20 -20] :attach "shadow-camera"}]]
-       [:ambientLight {:intensity 30}]
-             
-             
-             ]
-    }
-
-   "OP Mainnet"
-{:gltf 
-    {:castShadow "castShadow" 
-     :receiveShadow "receiveShadow"
-     :position [10 -20 0]
-     ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
-     :scale 1
-     :src "/maps/magical_manor.glb"}
-    :rigid-body {:colliders "trimesh" :type "fixed"}
-    :physics {:timeStep "vary"}
-    :control {:maxVelLimit 5
-              :sprintMult 2
-              :jumpVel 4
-              ;:airDragMultiplier 0.1
-              ;:fallingGravityScale 10
-              :camInitDis -3}
-    ;:skybox [:> drei/Stars]
-    ;:skybox [:> drei/Environment {:files "/psy.hdr" :ground {:scale 100}}]
-    :lights [:<>
-       ;[:directionalLight {:intensity 1 :castShadow "castShadow" :position [0 10 0] :shadow-bias -0.0004}
-       ; [:orthographicCamera {:args [-20 20 20 -20] :attach "shadow-camera"}]]
-       [:ambientLight {:intensity 3}]
-             
-             
-             ]
-    }
-
-   })
-
-(defn loading []
-  [:> Box {:position [(- 3.6) 0 0]}])
-
-(defn player-model [{:keys [nickname position quaternion] :as p}]
-  [:<>
-   [:> drei/Html {
-                  :key (str "html-player"(:key p))
-                  :style {:transform "translate(-50%, 0)"} :position [0 1 0]}
-    [:div {
-           :key (str "nickname-player"(:key p))
-           :style {:WebkitTextStroke "0.1rem #fff"}} nickname]] 
-   [:> drei/Gltf
-    {
-     :key (str "gltf-player"(:key p))
-     :castShadow "castShadow"
-     :receiveShadow "receiveShadow"
-     :position position
-     :quaternion quaternion
-     :scale 0.315
-     :src "/ghost_w_tophat-transformed.glb"}]])
 
 (defn player []
   (let [{:keys [x y z]} @(subscribe [:get-in [:player :position]])
@@ -324,29 +116,10 @@
    {:keys ["Space"] :name "jump"}
    {:keys ["Shift"] :name "run"}])
 
-
-(defn dragons []
-  [:<>
-
-[:> drei/Gltf
-    {:castShadow "castShadow"
-     :receiveShadow "receiveShadow"
-     :position [-100 10 0]
-     :scale 50
-     :src "/npc/mega_wyvern.glb"}]
-   
-[:> drei/Gltf
-    {:castShadow "castShadow"
-     :receiveShadow "receiveShadow"
-     :position [10 -1 0]
-     :scale 3
-     :src "/npc/black_dragon_with_idle_animation.glb"}]
-   ])
-
 (defn canvas []
   (let [
         environment-map @(subscribe [:get-in [:environment :map]])
-        {:keys [skybox lights physics rigid-body gltf]} (get maps environment-map)
+        {:keys [skybox lights gltf control]} (get maps environment-map)
         ]  
     [:> fiber/Canvas {:key environment-map :name environment-map :shadows "shadows" :onPointerDown (fn [e] (.requestPointerLock (.-target e)))}
      [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
@@ -358,13 +131,13 @@
 
         ;[other-player]     
 
-        [:> rapier/Physics physics
+        [:> rapier/Physics {:timeStep "vary"}
         
          [:> drei/KeyboardControls {:map keyboard-controls}
-          [:> ecc/default (get-in maps [environment-map :control]) 
+          [:> ecc/default control
            [:f> player]]]
          
-         [:> rapier/RigidBody rigid-body [:> drei/Gltf gltf]]
+         [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} [:> drei/Gltf gltf]]
         ]
        ;]
       ]]))
@@ -420,10 +193,12 @@
            ;[:h1 "Account"] 
            ;[:h1 (get chain :name)] 
            [:h4 "Position: x:"x" y:"y" z:"z]
+           [:> Button {:onClick #(dispatch [:send {:id "llama3" :message {:role "user" :content "Are you ready to play?"}}])} "Ask Llama3"]
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
            [:f> connect-kit]
            ;(str guild-data)
            (str players)
+       
        
            ;[:h1 "Skills"] 
            [:> SimpleGrid {:cols 3 :style {:height "50vh"}}

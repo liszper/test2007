@@ -1,30 +1,29 @@
+
 (ns main.app
-  (:require [reagent.core :as reagent]
+  (:require [main.wagmi :refer [bundle]]
+    
+            [reagent.core :as reagent]
             [reagent.dom  :as reagent-dom] 
             [reagent.dom.client :as rdc]
             [re-frame.core :as rf :refer [subscribe dispatch]]
             ["react-error-boundary" :refer [ErrorBoundary]]
     
-            ["@mantine/core" :refer [MantineProvider]]
-            
             ["ws" :as WebSocket]
             [cognitect.transit :as t]
 
-            ["wagmi" :as wagmi]
-            ["wagmi/chains" :refer [mainnet base optimism polygon]]
-            ["wagmi/connectors" :refer [injected metaMask safe walletConnect]]
-            ["@tanstack/react-query" :as tanstack]
-
-            ["@airstack/airstack-react" :as airstack] 
-            
             [main.component :refer [main]]))
+
+
+
+
 
 (rf/reg-event-db :reset (fn [_ [_ value]] value))
 (rf/reg-event-db :assoc-in (fn [db [_ path value]] (assoc-in db path value)))
 (rf/reg-event-db :init-in (fn [db [_ path value]] (if-not (get-in db path) (let [] (js/console.log "init: "(str path)) (assoc-in db path value)) db)))
+
 (rf/reg-sub :get-in (fn [db [_ path]] (get-in db path)))
-(rf/reg-fx 
-  :wait
+
+(rf/reg-fx :wait
   (fn [opts]
     (when (or (nil? (:when opts)) ((:when opts) (:db opts)))
       (-> ((:fn opts) (:db opts))
@@ -34,38 +33,24 @@
           (.catch (fn [x] (when (:catch opts) ((:catch opts) x))))))))
 (rf/reg-event-fx :wait (fn [{db :db} [_ opts]] {:wait (assoc opts :db db)}))
 
-(def wallet-connect-project-id "a1f553a67e9967aba78bc770c739bd61")
-(defonce query-client (new tanstack/QueryClient))
-(def config
-  (wagmi/createConfig 
-    #js {:chains #js [mainnet base optimism polygon] 
-         :connectors #js [(injected) (walletConnect #js {:projectId wallet-connect-project-id})]
-         :transports #js {"1" (wagmi/http)}}))
 
-(defn bundle []
-  [:> MantineProvider
-   [:> wagmi/WagmiProvider {:config config}
-    [:> tanstack/QueryClientProvider {:client query-client}
-     [:> airstack/AirstackProvider {:apiKey ""}
-      [:f> main]]]]])
 
-(defn react-error-handler [info]
-  [:p {:style {:color :red}} (str (.-error info))])
+
+
+(defn react-error-handler [info] [:p {:style {:color :red}} (str (.-error info))])
 
 (defn render-fn []
   [:> ErrorBoundary {:FallbackComponent (fn [info] (reagent.core/as-element [react-error-handler info]))}    
-   [:f> bundle]
-   ]
-  )
+   [:f> bundle
+    [:f> main]]])
 
-(defn render []
-  (reagent-dom/render [render-fn] (.getElementById js/document "app"))
-  )
+(defn render [] (reagent-dom/render [render-fn] (.getElementById js/document "app")))
 
-(defn ^:dev/after-load clear-cache-and-render!
-  []
-  (rf/clear-subscription-cache!)
-  (render))
+(defn ^:dev/after-load clear-cache-and-render! [] (rf/clear-subscription-cache!) (render))
+
+
+
+
 
 (def webs (atom nil))
 
@@ -96,12 +81,13 @@
     (set! (.-onerror ws) (.-error js/console))
     ))
 
+
+
+
+
 (defn ^:export init []
   
-  (rf/dispatch-sync
-    [:reset
-     {:environment {:map "Ethereum"}
-      }])
+  (rf/dispatch-sync [:reset {}])
 
   (render)
 
