@@ -133,7 +133,7 @@
 
         [:> rapier/Physics {:timeStep "vary"}
         
-         [:> drei/KeyboardControls {:map keyboard-controls}
+         [:> drei/KeyboardControls {:map keyboard-controls :debug? true :debug "debug"}
           [:> ecc/default control
            [:f> player]]]
          
@@ -177,7 +177,7 @@
         {:keys [qx qy qz qw]} @(subscribe [:get-in [:player :quaternion]])
         ]
         [:> Grid
-         [:> (.-Col Grid) {:span 8 :style {:position "absolute" :top 0 :left 0 :width "70vw" :background "black" :height "100vh" :padding 0}}
+         [:> (.-Col Grid) {:span 8 :style {:position "fixed" :top 0 :left 0 :width "70vw" :background "black" :height "100vh" :padding 0}}
 
           ;[canvas-test]
           (case status

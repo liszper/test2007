@@ -15,7 +15,8 @@
      ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
      :scale 0.6
      :src "/maps/twin_peaks_black_lodge.glb"}
-    :control {:maxVelLimit 5
+    :control {:debug true
+              :maxVelLimit 5
               :sprintMult 4
               :jumpVel 8
               ;:airDragMultiplier 0.1
@@ -41,7 +42,8 @@
      ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
      :scale 1
      :src "/maps/desert_sector.glb"}
-    :control {:maxVelLimit 5
+    :control {:debug true
+              :maxVelLimit 10
               :sprintMult 2
               :jumpVel 4
               ;:airDragMultiplier 0.1
