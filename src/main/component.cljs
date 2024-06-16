@@ -131,7 +131,7 @@
 
         ;[other-player]     
 
-        [:> rapier/Physics {:timeStep "vary"}
+        [:> rapier/Physics {:timeStep "vary" :debug "debug"}
         
          [:> drei/KeyboardControls {:map keyboard-controls :debug? true :debug "debug"}
           [:> ecc/default control

@@ -92,5 +92,9 @@
   (render)
 
   (ws-connect "/join")
+
+  (.addEventListener js/document "keydown" #(js/console.log %))
+
+  (.addEventListener js/document "keyup" #(js/console.log %))
   
   )
