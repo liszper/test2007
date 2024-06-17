@@ -221,7 +221,7 @@
            ;[:> Button {:onClick #(dispatch [:send {:id "llama3" :message {:role "user" :content "Are you ready to play?"}}])} "Ask Llama3"]
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
            [:f> connect-kit]
-           (when (and (= status "connected") (nil? guild-data)) [:> Button {:onClick #(join-guild)} "Join the Onchain guild"])
+           ;(when (and (= status "connected") (nil? guild-data)) [:> Button {:onClick #(join-guild)} "Join the Onchain guild"])
            ;(str guild-data)
            (when debug? (str players))
        
