@@ -138,7 +138,7 @@
          [:> drei/KeyboardControls {:map keyboard-controls :debug? (if debug? true false) :debug "debug"}
           [:> ecc/default (assoc control
                                  :debug debug?
-                                 :controllerKeys {:forward 12 :backward 13 :leftward 14 :rightward 15 :jump: 2}
+                                 :controllerKeys {:forward 12 :backward 13 :leftward 14 :rightward 15 :jump 2}
                                  )
            [:f> player]
            ]
