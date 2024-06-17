@@ -26,7 +26,7 @@
             ["../ecmascript/threejs" :refer [Box]]
             ))
 
-(defonce debug? true)
+(defonce debug? false)
 
 (defn player []
   (let [{:keys [x y z]} @(subscribe [:get-in [:player :position]])
@@ -138,6 +138,7 @@
          [:> drei/KeyboardControls {:map keyboard-controls :debug? (if debug? true false) :debug "debug"}
           [:> ecc/default (assoc control
                                  :debug debug?
+                                 ;:springK 1.4
                                  :controllerKeys {:forward 12 :backward 13 :leftward 14 :rightward 15 :jump 2}
                                  )
            [:f> player]
