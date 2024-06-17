@@ -94,7 +94,7 @@
 
   (ws-connect "/join")
 
-  (js/console.log Guild)
+  ;(js/console.log Guild)
   ;(fetch-guild)
 
   (when debug? (.addEventListener js/document "keydown" #(js/console.log %)))

@@ -199,7 +199,7 @@
 
           ;[canvas-test]
           (case status
-            "connected" (if guild-data [canvas] [lobby])
+            "connected" [canvas];(if guild-data [canvas] [lobby])
             "disconnected" [lobby]
             "connecting" [lobby]
             [:div "Sign-in First!"])
