@@ -17,20 +17,30 @@
        (not guilds)
        ))
 
-(defonce do-timer 
+(defn join-guild []
+  (js/console.log "Entering the Onchain guild..")
+  (dispatch 
+    [:wait 
+     {:when logged-in? 
+      :fn (fn [{:keys [address signer-fn]}] (.getPoints user-client address signer-fn))
+      :then #(dispatch [:assoc-in [:guilds :points] (js->clj % :keywordize-keys true)]) ;bad design pattern
+      :log #(js/console.log (str "success:" (js->clj % :keywordize-keys true)))
+      :catch #(js/console.log (str "Error: " (js->clj %)))}]))
+
+(defn fetch-guild []
   (js/setInterval
 
     (fn []
        
-      (when false;true
+      (js/console.log "Entering the Onchain guild..")
          
-      (dispatch 
-        [:wait 
-         {:when logged-in? 
-          :fn (fn [{:keys [address signer-fn]}] (.getMemberships user-client address signer-fn))
-          :then #(dispatch [:assoc-in [:guilds :joined] (js->clj % :keywordize-keys true)]) ;bad design pattern
-          :log #(js/console.log (str "success:" (js->clj % :keywordize-keys true)))
-          :catch #(js/console.log (str "Error: " (js->clj %)))}])
+      ;(dispatch 
+      ;  [:wait 
+      ;   {:when logged-in? 
+      ;    :fn (fn [{:keys [address signer-fn]}] (.getMemberships user-client address signer-fn))
+      ;    :then #(dispatch [:assoc-in [:guilds :joined] (js->clj % :keywordize-keys true)]) ;bad design pattern
+      ;    :log #(js/console.log (str "success:" (js->clj % :keywordize-keys true)))
+      ;    :catch #(js/console.log (str "Error: " (js->clj %)))}])
         
       (dispatch 
         [:wait 
@@ -39,7 +49,6 @@
           :then #(dispatch [:assoc-in [:guilds :points] (js->clj % :keywordize-keys true)]) ;bad design pattern
           :log #(js/console.log (str "success:" (js->clj % :keywordize-keys true)))
           :catch #(js/console.log (str "Error: " (js->clj %)))}])
-        )
 
       )
     

@@ -7,7 +7,7 @@
 
 
 (defn loading []
-  [:> Box {:position [(- 3.6) 0 0]}])
+  nil)
 
 
 (defn player-model [{:keys [nickname position quaternion] :as p}]

@@ -1,7 +1,8 @@
 
 (ns main.app
   (:require [main.wagmi :refer [bundle]]
-    
+            [main.guild :refer [fetch-guild]]
+            
             [reagent.core :as reagent]
             [reagent.dom  :as reagent-dom] 
             [reagent.dom.client :as rdc]
@@ -92,6 +93,8 @@
   (render)
 
   (ws-connect "/join")
+
+  ;(fetch-guild)
 
   (when debug? (.addEventListener js/document "keydown" #(js/console.log %)))
   (when debug? (.addEventListener js/document "keyup" #(js/console.log %)))

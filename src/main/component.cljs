@@ -3,6 +3,7 @@
   (:require [main.maps :refer [maps]]
             [main.models :refer [loading player-model]]
             [main.wagmi :refer [connect-kit]]
+            [main.guild :refer [join-guild]]
     
             ["@mantine/core" :refer [AppShell Avatar Badge Burger Button createTheme Group SimpleGrid Grid Container Flex Stack Skeleton]]
             ["@mantine/hooks" :refer [useDisclosure]]
@@ -155,11 +156,20 @@
   ;  (fn [] 
   ;    (js/console.log "Test component rendered..")
   ;    )) 
-  [:> fiber/Canvas
-   [:ambientLight {:intensity (/ (.-PI js/Math) 2)}]
+  [:> fiber/Canvas {:shadows "shadows"}
+   [:ambientLight {:intensity 3}]
       
-   [:> Box {:position [(- 1.2) 0 0]}]
-   [:> Box {:position [1.2 0 0]}]
+   ;[:> Box {:position [0 0 0]}]
+   ;[:> Box {:position [1.2 0 0]}]
+
+     [:> drei/Stars]
+   [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
+   [:> drei/Gltf
+    {;:castShadow "castShadow"
+     ;:receiveShadow "receiveShadow"
+     :position [0 0 -100]
+     :scale 30
+     :src "/npc/ethereum_logo.glb"}]]
    ]
   )
 
@@ -189,29 +199,29 @@
 
           ;[canvas-test]
           (case status
-            "connected" [canvas] 
-            "disconnected" [:f> lobby]
-            "connecting" [:f> lobby]
+            "connected" (if guild-data [canvas] [lobby])
+            "disconnected" [lobby]
+            "connecting" [lobby]
             [:div "Sign-in First!"])
 
           ]
          [:> (.-Col Grid) {:span 4 :style {:position "absolute" :top 0 :right 0 :width "34vw"}}
           [:> Stack {:align "stretch" :h "100%" :justify "space-between"}
          
-           ;[:h1 "Account"] 
            ;[:h1 (get chain :name)] 
            (when debug? [:h4 "Position: x:"x" y:"y" z:"z])
            ;[:> Button {:onClick #(dispatch [:send {:id "llama3" :message {:role "user" :content "Are you ready to play?"}}])} "Ask Llama3"]
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
            [:f> connect-kit]
+           (when (and (= status "connected") (nil? guild-data)) [:> Button {:onClick #(join-guild)} "Join the Onchain guild"])
            ;(str guild-data)
            (when debug? (str players))
        
        
-           ;[:h1 "Skills"] 
+           (when guild-data [:h1 "Skills"])
            [:> SimpleGrid {:cols 3 :style {:height "50vh"}}
           
-            (when false ;(= status "connected")
+            (when (and (= status "connected") points)
             (for [{:keys [totalPoints rank guildPlatformId]} (keep #(when (= (:guildId %) 67432) %) points)]
               [:div
                [:> Badge {:size "xl"} 
