@@ -28,12 +28,14 @@
          :connectors #js [(injected) (walletConnect #js {:projectId wallet-connect-project-id})]
          :transports #js {"1" (wagmi/http)}}))
 
-(defn bundle [& children]
+(defn bundle [child];& children]
   [:> MantineProvider
    [:> wagmi/WagmiProvider {:config config}
     [:> tanstack/QueryClientProvider {:client query-client}
      [:> airstack/AirstackProvider {:apiKey ""}
-      [:<> children]]]]])
+      child
+      ;[:<> children]
+      ]]]])
 
 
 (defn connect-kit []

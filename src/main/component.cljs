@@ -223,7 +223,7 @@
           
             (when (and (= status "connected") points)
             (for [{:keys [totalPoints rank guildPlatformId]} (keep #(when (= (:guildId %) 67432) %) points)]
-              [:div
+              [:div {:key (str "point" guildPlatformId)}
                [:> Badge {:size "xl"} 
                 (str totalPoints " ")]
                [:> Badge {:size "xl"} 
