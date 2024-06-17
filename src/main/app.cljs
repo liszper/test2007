@@ -1,7 +1,7 @@
 
 (ns main.app
   (:require [main.wagmi :refer [bundle]]
-            [main.guild :refer [fetch-guild]]
+            [main.guild :refer [Guild fetch-guild]]
             
             [reagent.core :as reagent]
             [reagent.dom  :as reagent-dom] 
@@ -55,7 +55,7 @@
 
 (def webs (atom nil))
 
-(rf/reg-fx :send (fn [opts] (.send @webs;(get-in opts [:db :websocket "join"])
+(rf/reg-fx :send (fn [opts [_ _]] (.send @webs;(get-in opts [:db :websocket "join"])
                                    (t/write (t/writer :json) (:message opts)))))
 (rf/reg-event-fx :send (fn [{db :db} [_ opts]] {:send {:message opts :db db}}))
 
@@ -94,6 +94,7 @@
 
   (ws-connect "/join")
 
+  (js/console.log Guild)
   ;(fetch-guild)
 
   (when debug? (.addEventListener js/document "keydown" #(js/console.log %)))

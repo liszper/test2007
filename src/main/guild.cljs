@@ -5,12 +5,12 @@
   ))
 
 
-(defonce Guild (guild/createGuildClient "test"))
-(defonce user-client (.-user Guild))
-(defonce guild-client (.-guild Guild))
-(defonce role-client (.-role Guild))
-(defonce reward-client (.-reward Guild))
-(defonce admin-client (.-admin Guild))
+(def Guild (guild/createGuildClient "test"))
+(def user-client (.-user Guild))
+(def guild-client (.-guild Guild))
+(def role-client (.-role Guild))
+(def reward-client (.-reward Guild))
+(def admin-client (.-admin Guild))
 
 (defn logged-in? [{:keys [address status guilds]}] 
   (and address (= status "connected") 
