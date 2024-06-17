@@ -49,7 +49,7 @@
     
   (.on wss "connection"
        (fn [ws req]
-         (scan-all)
+         ;(scan-all)
          (.on ws "error" (.-error js/console))
          (.on ws "close" (fn  [req] (js/console.log "Websocket connection closed..")))
          (.on ws "message"
