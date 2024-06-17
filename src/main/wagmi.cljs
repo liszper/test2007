@@ -7,7 +7,7 @@
   
             ["wagmi" :as wagmi]
             ["wagmi/chains" :refer [mainnet base optimism polygon]]
-            ["wagmi/connectors" :refer [injected metaMask safe walletConnect]]
+            ["wagmi/connectors" :refer [injected metaMask safe walletConnect coinbaseWallet]]
             ["@tanstack/react-query" :as tanstack]
             ["@airstack/airstack-react" :as airstack] 
             
@@ -25,24 +25,25 @@
 (def config
   (wagmi/createConfig 
     #js {:chains #js [mainnet base optimism polygon] 
-         :connectors #js [(injected) (walletConnect #js {:projectId wallet-connect-project-id})]
+         :connectors #js [(injected) (walletConnect #js {:projectId wallet-connect-project-id}) (coinbaseWallet)]
          :transports #js {"1" (wagmi/http)}}))
 
 (defn bundle [child];& children]
   [:> MantineProvider
    [:> wagmi/WagmiProvider {:config config}
     [:> tanstack/QueryClientProvider {:client query-client}
-     [:> airstack/AirstackProvider {:apiKey ""}
+     ;[:> airstack/AirstackProvider {:apiKey ""}
       child
       ;[:<> children]
-      ]]]])
+      ;]
+     ]]])
 
 
 (defn connect-kit []
-  (react/useEffect
-    (fn []
-      (js/console.log "Connect kit rendered..")
-     )) 
+  ;(react/useEffect
+  ;  (fn []
+  ;    (js/console.log "Connect kit rendered..")
+  ;   )) 
   (let [{:keys [address chain chainId]} (js->clj (wagmi/useAccount) :keywordize-keys true)
         _ (dispatch [:assoc-in [:address] address])
         sign-message (.-signMessageAsync (wagmi/useSignMessage))

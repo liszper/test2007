@@ -1,7 +1,9 @@
 
 (ns main.models
   (:require ["@react-three/drei" :as drei]
+            ["react" :as react]
             ["../ecmascript/threejs" :refer [Box]]
+            ["@react-three/rapier" :as rapier]
     ))
 
 
@@ -9,6 +11,10 @@
 (defn loading []
   nil)
 
+(defn object [gltf]
+  [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
+   [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"}
+    [:> drei/Gltf gltf]]])
 
 (defn player-model [{:keys [nickname position quaternion] :as p}]
   [:<>
@@ -46,3 +52,11 @@
      :scale 3
      :src "/npc/black_dragon_with_idle_animation.glb"}]
    ])
+
+(defn guild-empire []
+  (object
+    {:castShadow "castShadow"
+     :receiveShadow "receiveShadow"
+     :position [10 0 -10]
+     :scale 0.2
+     :src "/objects/GuildDenver.glb"}))

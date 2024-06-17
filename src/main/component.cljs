@@ -1,7 +1,7 @@
 
 (ns main.component
   (:require [main.maps :refer [maps]]
-            [main.models :refer [loading player-model]]
+            [main.models :refer [loading player-model] :as model]
             [main.wagmi :refer [connect-kit]]
             [main.guild :refer [join-guild]]
     
@@ -122,7 +122,7 @@
 (defn canvas []
   (let [
         environment-map @(subscribe [:get-in [:environment :map]])
-        {:keys [skybox lights gltf control]} (get maps environment-map)
+        {:keys [skybox lights gltf control objects]} (get maps environment-map)
         ]  
     [:> fiber/Canvas {:key environment-map :name environment-map :shadows "shadows" :onPointerDown (fn [e] (.requestPointerLock (.-target e)))}
      [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
@@ -139,6 +139,7 @@
          [:> drei/KeyboardControls {:map keyboard-controls :debug? (if debug? true false) :debug "debug"}
           [:> ecc/default (assoc control
                                  :debug debug?
+                                 :followLight true
                                  ;:springK 1.4
                                  :controllerKeys {:forward 12 :backward 13 :leftward 14 :rightward 15 :jump 2}
                                  )
@@ -147,9 +148,15 @@
           ]
          
          [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} [:> drei/Gltf gltf]]
-        ]
+        
+         objects
+         ]
+
        ;]
-      ]]))
+      ]
+     
+     [:> drei/Stats]
+     ]))
 
 (defn lobby []
   ;(react/useEffect
@@ -157,20 +164,21 @@
   ;    (js/console.log "Test component rendered..")
   ;    )) 
   [:> fiber/Canvas {:shadows "shadows"}
-   [:ambientLight {:intensity 3}]
+   [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
+   [:> rapier/Physics {:timeStep "vary" :debug (if debug? "debug" nil)}
+    [:ambientLight {:intensity 3}]
       
    ;[:> Box {:position [0 0 0]}]
    ;[:> Box {:position [1.2 0 0]}]
 
      [:> drei/Stars]
-   [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
    [:> drei/Gltf
     {;:castShadow "castShadow"
      ;:receiveShadow "receiveShadow"
      :position [0 0 -100]
      :scale 30
      :src "/npc/ethereum_logo.glb"}]]
-   ]
+   ]]
   )
 
 (defn main []

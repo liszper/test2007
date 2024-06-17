@@ -10,9 +10,22 @@
 
 (set! *warn-on-infer* false)
 
+(def db (atom {}))
+
 (def app (express))
 (def server (http/createServer app))
 (def wss (new ws/WebSocketServer #js {:noServer true}))
+
+(defn get-ip-address [ws] (.-remoteAddress (.-_socket ws)))
+
+(defn scan-all []
+  (let [clients (.-clients wss)
+        ip-addresses (mapv get-ip-address clients)
+        ]
+    (js/console.log "IP Addresses: ")
+    (js/console.log (clj->js ip-addresses))
+    ) 
+  )
 
 (defn broadcast-to-all [data]
   (.forEach
@@ -35,14 +48,18 @@
          ))
     
   (.on wss "connection"
-       (fn [ws]
+       (fn [ws req]
+         (scan-all)
          (.on ws "error" (.-error js/console))
+         (.on ws "close" (fn  [req] (js/console.log "Websocket connection closed..")))
          (.on ws "message"
               (fn [raw-data]
-                (let [data (t/read (t/reader :json) raw-data)]
+                (let [data (t/read (t/reader :json) raw-data)
+                      ]
                   (ws-handler data))
                 ))
-         (.send ws (t/write (t/writer :json) {:test "Message"}))))
+         ;(.send ws (t/write (t/writer :json) {:test "Message"}))
+         ))
   
   (.listen server (or (.-PORT (.-env process)) 5000))
 

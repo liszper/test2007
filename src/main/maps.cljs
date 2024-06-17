@@ -1,6 +1,7 @@
 
 (ns main.maps
   (:require ["@react-three/drei" :as drei]
+            [main.models :as model]
     ))
 
 
@@ -11,9 +12,9 @@
    {:gltf 
     {:castShadow "castShadow" 
      :receiveShadow "receiveShadow"
-     :position [0 -2 0]
+     :position [0 0 0]
      ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
-     :scale 0.6
+     :scale 1
      :src "/maps/twin_peaks_black_lodge.glb"}
     :control {:maxVelLimit 5
               :sprintMult 4
@@ -22,15 +23,32 @@
               ;:fallingGravityScale 10
               :camInitDis -3}
     :skybox [:> drei/Stars]
-    :lights [:<>
-       [:directionalLight {:intensity 1 :castShadow "castShadow" :position [0 10 0] :shadow-bias -0.0004}
-        [:orthographicCamera {:args [-20 20 20 -20] :attach "shadow-camera"}]]
-       [:ambientLight {:intensity 0.5}]
-   [:spotLight {:angle 0.15 :decay 0 :intensity (.-PI js/Math) :penumbra 1 :position [10 10 10]}]
-   [:pointLight {:decay 0 :intensity (.-PI js/Math) :position [(- 10) (- 10) (- 10)]}]
+    :lights 
+    [:<>
+    
+     ;[:directionalLight {:intensity 1 :castShadow "castShadow" :position [0 10 0] :shadow-bias -0.0004}
+     ; [:orthographicCamera {:args [-20 20 20 -20] :attach "shadow-camera"}]]
+
+     [:ambientLight {:intensity 0.5}]
+
+     ;[:spotLight {:name "followLight" :angle 0.1 :decay 0 :intensity 5 :penumbra 1 :position [0 10 0]}]
+  
+     [:pointLight {:decay 0 :intensity 2 :position [100 10 -100]}]
+     [:pointLight {:decay 0 :intensity 2 :position [-100 10 100]}]
+     [:pointLight {:decay 0 :intensity 2 :position [100 10 100]}]
+     [:pointLight {:decay 0 :intensity 2 :position [-100 10 -100]}]
              
              
              ]
+    :objects 
+    [:<>
+     (model/object
+       {:castShadow "castShadow"
+        :receiveShadow "receiveShadow"
+        :position [10 0 -10]
+        :scale 0.2
+        :src "/objects/GuildDenver.glb"})
+     ]
     }
    
    "Ethereum"
@@ -47,7 +65,6 @@
               ;:airDragMultiplier 0.1
               ;:fallingGravityScale 10
               :camInitDis -3}
-    ;:skybox [:> drei/Stars]
     ;:skybox [:> drei/Environment {:files "/psy.hdr" :ground {:scale 100}}]
     :lights [:<>
        ;[:directionalLight {:intensity 1 :castShadow "castShadow" :position [0 10 0] :shadow-bias -0.0004}
