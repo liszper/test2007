@@ -1,6 +1,7 @@
 
 (ns main.models
   (:require ["@react-three/drei" :as drei]
+            [reagent.core :as reagent]
             ["react" :as react]
             ["../ecmascript/threejs" :refer [Box]]
             ["@react-three/rapier" :as rapier]
@@ -12,7 +13,7 @@
   nil)
 
 (defn object [gltf]
-  [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
+  [:> react/Suspense {:fallback (reagent/as-element [loading])}
    [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"}
     [:> drei/Gltf gltf]]])
 
