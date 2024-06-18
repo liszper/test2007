@@ -73,6 +73,11 @@
              
              
              ]
+    :objects [:<>
+             [:> drei/PositionalAudio {:autoplay "autoplay" :loop "loop" :url "/ost/yellow_floating_sand_dune_world.mp3" :distance 3}] 
+              ;[:fog {:attach "fog" :args #js ["#cc7b32" 10 500]}]
+
+              ]
     }
 
    "Polygon"

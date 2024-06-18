@@ -111,6 +111,19 @@
             :quaternion [qx qy qz qw]}]]   
          ))]))
 
+(def animation-set
+   {:idle "Idle",
+    :walk "Walk",
+    :run "Run",
+    :jump "Jump_Start",
+    :jumpIdle "Jump_Idle",
+    :jumpLand "Jump_Land",
+    :fall "Climbing",
+    :action1 "Wave",
+    :action2 "Dance",
+    :action3 "Cheer",
+    :action4 "Attack(1h)"})
+
 (def keyboard-controls
   [{:keys ["ArrowUp" "KeyW"] :name "forward"}
    {:keys ["ArrowDown" "KeyS"] :name "backward"}
@@ -138,8 +151,9 @@
         
          [:> drei/KeyboardControls {:map keyboard-controls :debug? (if debug? true false) :debug "debug"}
           [:> ecc/default (assoc control
+                                 :animated "animated"
                                  :debug debug?
-                                 :followLight true
+                                 ;:followLight true
                                  ;:springK 1.4
                                  :controllerKeys {:forward 12 :backward 13 :leftward 14 :rightward 15 :jump 2}
                                  )
