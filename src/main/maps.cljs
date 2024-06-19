@@ -168,9 +168,9 @@
                (model/platform-model {:i i :x x :y y :z z :color color :size size}))))
          )
 
-                 <Clouds material={THREE.MeshBasicMaterial}>
-          <Cloud seed={10} bounds={50} volume={80} position={[40, 0, -80]} />
-          <Cloud seed={10 :bounds 50 :volume 80 :position [-40 10 -80]}] ]
+      ;           <Clouds material={THREE.MeshBasicMaterial}>
+      ;    <Cloud seed={10} bounds={50} volume={80} position={[40, 0, -80]} />
+      ;    <Cloud seed={10 :bounds 50 :volume 80 :position [-40 10 -80]}] ]
 
          (for [i [1]]
            (let [x (- (rand-int 300) (rand-int 300))
