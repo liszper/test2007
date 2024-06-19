@@ -25,6 +25,9 @@
     [:div {
            :key (str "nickname-player"(:key p))
            :style {:WebkitTextStroke "0.1rem #fff"}} nickname]] 
+             
+   [:> drei/PositionalAudio {:autoplay "autoplay" :loop "loop" :url "/ost/mystery_funk.mp3" :distance 3}] 
+   
    [:> drei/Gltf
     {
      :key (str "gltf-player"(:key p))
@@ -35,6 +38,11 @@
      :scale 0.315
      :src "/ghost_w_tophat-transformed.glb"}]])
 
+(defn platform-model [{:keys [i size x y z color]}]
+  [:group 
+   [:> rapier/RigidBody {:key (str "box"i) :colliders "trimesh" :type "fixed"} 
+    [:> drei/Box {:castShadow "castShadow" :receiveShadow "receiveShadow" :args size :position [x y z] :rotation [0 0 0]}
+     [:meshStandardMaterial {:color color}]]]])
 
 (defn dragons []
   [:<>

@@ -151,7 +151,7 @@
         
          [:> drei/KeyboardControls {:map keyboard-controls :debug? (if debug? true false) :debug "debug"}
           [:> ecc/default (assoc control
-                                 :animated "animated"
+                                 ;:animated "animated"
                                  :debug debug?
                                  ;:followLight true
                                  ;:springK 1.4
@@ -161,7 +161,7 @@
            ]
           ]
          
-         [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} [:> drei/Gltf gltf]]
+         (when gltf [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} [:> drei/Gltf gltf]])
         
          objects
          ]
