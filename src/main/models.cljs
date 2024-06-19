@@ -26,7 +26,7 @@
            :key (str "nickname-player"(:key p))
            :style {:WebkitTextStroke "0.1rem #fff"}} nickname]] 
              
-   [:> drei/PositionalAudio {:autoplay "autoplay" :loop "loop" :url "/ost/mystery_funk.mp3" :distance 3}] 
+   ;[:> drei/PositionalAudio {:autoplay "autoplay" :loop "loop" :url "/ost/mystery_funk.mp3" :distance 3}] 
    
    [:> drei/Gltf
     {
