@@ -11,6 +11,7 @@
 (set! *warn-on-infer* false)
 
 (def db (atom {}))
+(def prev-db (atom {}))
 
 (def app (express))
 (def server (http/createServer app))
@@ -32,13 +33,21 @@
     (.-clients wss)
     (fn [client] (.send client (t/write (t/writer :json) data)))))
 
-(defn ws-handler [{:keys [id] :as data}]
+(defn ws-handler [{:keys [id player position quaternion] :as data}]
   (case id
-    "movement" (broadcast-to-all data)
+    "movement" (swap! db assoc-in [:players (:located player) (:name player)] {:position position :quaternion quaternion});(broadcast-to-all data)
     (js/console.log "Unknown websocket message: "data))
   )
 
 (defn ^:export init []
+
+
+  (js/setInterval
+    (fn []
+      (when (not= @db @prev-db)
+        (broadcast-to-all (assoc @db :id "movement"))
+        (reset! prev-db @db)))
+    33.33)
 
   (.use app "/" (.static express "public/app"))
 

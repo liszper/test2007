@@ -9,8 +9,6 @@
             ["wagmi/chains" :refer [mainnet base optimism polygon]]
             ["wagmi/connectors" :refer [injected metaMask safe walletConnect coinbaseWallet]]
             ["@tanstack/react-query" :as tanstack]
-            ["@airstack/airstack-react" :as airstack] 
-            
             ["@mantine/core" :refer [MantineProvider AppShell Avatar Badge Burger Button createTheme Group SimpleGrid Grid Container Flex Stack Skeleton]]
             ["@mantine/hooks" :refer [useDisclosure]]
             ["@tabler/icons-react" :as icon]
@@ -59,16 +57,16 @@
     
     (if address
      
-      [:> Flex {:gap "sm"}
+      [:<>
        ;[:p (str (js->clj guild-client))]
        ;player-name 
        [:> Button 
           {:onClick #(disconnect)}
           "Disconnect"]
-       ;[:f> signIntoGuild]
        ]
       
-      [:> Flex {:gap "sm"}
+      [:<>
+       [:center [:h2 "Connect your wallet:"]]
        (for [connector connectors]
          [:> Button 
           {:key (.-id connector)

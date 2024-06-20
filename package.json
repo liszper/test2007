@@ -18,7 +18,6 @@
     "bundle:optimize": "npm run bundle --  --analyze --metafile=.bundle.meta.json --define:NODE_ENV=production --minify"
   },
   "dependencies": {
-    "@airstack/airstack-react": "^0.6.3",
     "@guildxyz/sdk": "^2.5.0",
     "@guildxyz/types": "^1.9.10",
     "@mantine/core": "^7.4.2",
@@ -35,6 +34,7 @@
     "ecctrl": "^1.0.79",
     "esbuild": "^0.20.1",
     "express": "^4.19.2",
+    "howler": "^2.2.4",
     "http": "^0.0.1-security",
     "leva": "^0.9.35",
     "ollama": "^0.5.2",
@@ -45,8 +45,8 @@
     "three": "^0.165.0",
     "viem": "^2.13.7",
     "vite": "^5.3.1",
-    "wagmi": "^2.9.10",
-    "ws": "^8.17.0",
+    "wagmi": "^2.10.2",
+    "ws": "^8.17.1",
     "zustand": "^4.5.2"
   },
   "devDependencies": {

@@ -65,13 +65,10 @@
     (reset! webs ws)
     (set! (.-onmessage ws)
           (fn [event]
-            (let [{:keys [id player position quaternion] :as data} (t/read (t/reader :json) (.-data event))]
+            (let [{:keys [id players] :as data} (t/read (t/reader :json) (.-data event))]
               (case id
                 "movement"
-                (dispatch [:assoc-in [:players (:located player) (:name player)]
-                         {:position position
-                          :quaternion quaternion
-                          }])
+                (dispatch [:assoc-in [:players] players])
                 nil)
               )
             ;(.log js/console "received: %s" (t/read (t/reader :json) (.-data event)))

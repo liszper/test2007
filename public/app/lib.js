@@ -14,10 +14,10 @@ import * as i12 from "wagmi/chains";
 import * as i13 from "wagmi/connectors";
 import * as i14 from "@react-three/drei";
 import * as i15 from "@mantine/hooks";
-import * as i16 from "react";
-import * as i17 from "@react-three/fiber";
-import * as i18 from "@tabler/icons-react";
-import * as i19 from "@airstack/airstack-react";
+import * as i16 from "howler";
+import * as i17 from "react";
+import * as i18 from "@react-three/fiber";
+import * as i19 from "@tabler/icons-react";
 
 const ALL = {};
 
@@ -62,10 +62,10 @@ ALL["@react-three/drei"] = i14;
 
 ALL["@mantine/hooks"] = i15;
 
-ALL["react"] = i16;
+ALL["howler"] = i16;
 
-ALL["@react-three/fiber"] = i17;
+ALL["react"] = i17;
 
-ALL["@tabler/icons-react"] = i18;
+ALL["@react-three/fiber"] = i18;
 
-ALL["@airstack/airstack-react"] = i19;
+ALL["@tabler/icons-react"] = i19;

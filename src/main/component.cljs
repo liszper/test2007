@@ -5,7 +5,7 @@
             [main.wagmi :refer [connect-kit]]
             [main.guild :refer [join-guild]]
     
-            ["@mantine/core" :refer [AppShell Avatar Badge Burger Button createTheme Group SimpleGrid Grid Container Flex Stack Skeleton]]
+            ["@mantine/core" :refer [AppShell Modal Avatar Badge Burger Button createTheme Group SimpleGrid Grid Container Flex Stack Skeleton]]
             ["@mantine/hooks" :refer [useDisclosure]]
             ["@tabler/icons-react" :as icon]
 
@@ -19,10 +19,9 @@
             ["@react-three/drei" :as drei]
             ["@react-three/rapier" :as rapier]
             ["ecctrl" :refer [Controller] :as ecc]
+            ["howler" :refer [Howl]]
             
             ["@guildxyz/sdk" :as guild]
-            
-            ["@airstack/airstack-react" :as airstack] 
             
             ["../ecmascript/threejs" :refer [Box]]
             ))
@@ -135,7 +134,8 @@
 (defn canvas []
   (let [
         environment-map @(subscribe [:get-in [:environment :map]])
-        {:keys [skybox lights gltf control objects]} (get maps environment-map)
+        {:keys [skybox lights gltf ost control objects]} (get maps environment-map)
+        music-play (when ost (new Howl #js {:src (clj->js ost) :loop true :autoplay true}))
         ]  
     [:> fiber/Canvas {:key environment-map :name environment-map :shadows "shadows" :onPointerDown (fn [e] (.requestPointerLock (.-target e)))}
      [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
@@ -172,11 +172,18 @@
      [:> drei/Stats]
      ]))
 
+(defonce lobby-music
+  (new Howl #js {:src #js ["/ost/through_the_ether.mp3"]
+                 :loop true
+                 :html5 true
+                 ;:autoplay true
+                 }))
+
 (defn lobby []
-  ;(react/useEffect
-  ;  (fn [] 
-  ;    (js/console.log "Test component rendered..")
-  ;    )) 
+  (react/useEffect
+    (fn [] 
+      (js/console.log "Lobby component rendered..")
+      )) 
   [:> fiber/Canvas {:shadows "shadows"}
    [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
    [:> rapier/Physics {:timeStep "vary" :debug (if debug? "debug" nil)}
@@ -187,27 +194,31 @@
 
      [:> drei/Stars]
    [:> drei/Gltf
-    {;:castShadow "castShadow"
-     ;:receiveShadow "receiveShadow"
+    {:castShadow "castShadow"
+     :receiveShadow "receiveShadow"
      :position [0 0 -100]
      :scale 30
      :src "/npc/ethereum_logo.glb"}]]
+
+   [:> drei/Clouds {:material three/MeshBasicMaterial}
+    [:> drei/Cloud {:seed 10 :bounds 50 :volume 80 :position [0 0 0] :speed 0.1}]
+    [:> drei/Cloud {:seed 1 :bounds 50 :volume 80 :position [-80 10 -80] :speed 0.05}]
+    ]
+
    ]]
   )
 
 (defn main []
-  ;(react/useEffect
-  ;  (fn [] 
-  ;    (js/console.log "Main component rendered..")
-  ;    )) 
   (let [{:keys [address status chain chainId]} (js->clj (wagmi/useAccount) :keywordize-keys true)
         _ (dispatch [:assoc-in [:status] status])
+        _ (when (= status "connected") (.stop lobby-music))
         _ (dispatch [:assoc-in [:chain] chain])
         _ (dispatch [:assoc-in [:environment :map] (:name chain)])
         connect (.-connect (wagmi/useConnect))
         disconnect (.-disconnect (wagmi/useDisconnect))
         connectors (.-connectors (wagmi/useConnect))
         signer (.-signMessageAsync (wagmi/useSignMessage))
+        tos? @(subscribe [:get-in [:tos?]])
         players @(subscribe [:get-in [:players]])
         guild-data @(subscribe [:get-in [:guilds]])
         points @(subscribe [:get-in [:guilds :points]])
@@ -222,25 +233,34 @@
           ;[canvas-test]
           (case status
             "connected" [canvas];(if guild-data [canvas] [lobby])
-            "disconnected" [lobby]
-            "connecting" [lobby]
+            "disconnected" [:f> lobby]
+            "connecting" [:f> lobby]
             [:div "Sign-in First!"])
 
           ]
          [:> (.-Col Grid) {:span 4 :style {:position "absolute" :top 0 :right 0 :width "34vw"}}
+          
+          [:> Modal {:opened (and (not= status "connected") (not tos?))
+                     :onClose (fn []
+                                (.play lobby-music)
+                                (dispatch [:assoc-in [:tos?] true])) :title "Disclaimer" :centered "centered"}
+           [:p "Adventure.io is an experimental onchain game engine made by the team at "[:a {:href "https://guild.xyz" :target "_blank"} "Guild.xyz"]]]
+          
           [:> Stack {:align "stretch" :h "100%" :justify "space-between"}
          
            ;[:h1 (get chain :name)] 
-           (when debug? [:h4 "Position: x:"x" y:"y" z:"z])
+           ;(when debug? 
+             [:h4 "Position: x:"x" y:"y" z:"z]
+             ;)
            ;[:> Button {:onClick #(dispatch [:send {:id "llama3" :message {:role "user" :content "Are you ready to play?"}}])} "Ask Llama3"]
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
            [:f> connect-kit]
-           ;(when (and (= status "connected") (nil? guild-data)) [:> Button {:onClick #(join-guild)} "Join the Onchain guild"])
+           (when (and (= status "connected") (nil? guild-data)) [:> Button {:onClick #(join-guild)} "Join the Onchain guild"])
            ;(str guild-data)
            (when debug? (str players))
        
        
-           (when guild-data [:h1 "Skills"])
+           (when (and (= status "connected") guild-data) [:h1 "Skills"])
            [:> SimpleGrid {:cols 3 :style {:height "50vh"}}
           
             (when (and (= status "connected") points)
