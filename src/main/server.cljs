@@ -47,7 +47,7 @@
       (when (not= @db @prev-db)
         (broadcast-to-all (assoc @db :id "movement"))
         (reset! prev-db @db)))
-    33.33)
+    17)
 
   (.use app "/" (.static express "public/app"))
 
