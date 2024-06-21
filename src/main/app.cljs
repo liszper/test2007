@@ -53,31 +53,23 @@
 
 
 
-(def webs (atom nil))
-
-(rf/reg-fx :send (fn [opts [_ _]] (.send @webs;(get-in opts [:db :websocket "join"])
-                                   (t/write (t/writer :json) (:message opts)))))
+(def websocket (atom nil))
+(rf/reg-fx :send (fn [opts [_ _]] (.send @websocket (t/write (t/writer :json) (:message opts)))))
 (rf/reg-event-fx :send (fn [{db :db} [_ opts]] {:send {:message opts :db db}}))
 
 (defn ws-connect [uri]
   (let [ws (new js/WebSocket uri)]
-    ;(dispatch [:assoc-in [:websocket uri] ws])
-    (reset! webs ws)
+    (reset! websocket ws)
     (set! (.-onmessage ws)
           (fn [event]
             (let [{:keys [id players] :as data} (t/read (t/reader :json) (.-data event))]
               (case id
-                "movement"
-                (dispatch [:assoc-in [:players] players])
-                nil)
-              )
-            ;(.log js/console "received: %s" (t/read (t/reader :json) (.-data event)))
-            ))
+                "movement" (dispatch [:assoc-in [:players] players])
+                nil))))
     (set! (.-onopen ws) (fn [] 
                           (.log js/console "Websocket connection established.")
                           ))
-    (set! (.-onerror ws) (.-error js/console))
-    ))
+    (set! (.-onerror ws) (.-error js/console))))
 
 
 

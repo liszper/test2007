@@ -13,9 +13,8 @@
   nil)
 
 (defn object [gltf]
-  [:> react/Suspense {:fallback (reagent/as-element [loading])}
-   [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"}
-    [:> drei/Gltf gltf]]])
+   [:> rapier/RigidBody (if (:key gltf) {:key (str (:key gltf)) :colliders "trimesh" :type "fixed"} {:colliders "trimesh" :type "fixed"})
+    [:> drei/Gltf (dissoc gltf :key)]])
 
 (defn player-model [{:keys [nickname position quaternion] :as p}]
   [:<>
@@ -24,7 +23,7 @@
                   :style {:transform "translate(-50%, 0)"} :position [0 1 0]}
     [:div {
            :key (str "nickname-player"(:key p))
-           :style {:WebkitTextStroke "0.1rem #fff"}} nickname]] 
+           :style {:WebkitTextStroke "0.1rem #000"}} nickname]] 
               
    [:> drei/Gltf
     {
@@ -36,10 +35,10 @@
      :scale 0.315
      :src "/ghost_w_tophat-transformed.glb"}]])
 
-(defn platform-model [{:keys [i ii size x y z color]}]
+(defn platform-model [{:keys [i ii size x y z rx ry rz color]}]
   [:group {:key (str "box"(+ (* ii 1000)i))}
    [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} 
-    [:> drei/Box {:castShadow "castShadow" :receiveShadow "receiveShadow" :args size :position [x y z] :rotation [0 0 0]}
+    [:> drei/Box {:args size :position [x y z] :rotation [rx ry rz]}
      [:meshStandardMaterial {:color color}]]]])
 
 (defn dragons []

@@ -1,6 +1,7 @@
 
 (ns main.server
   (:require [main.npc :refer [llama3 ask-edn ask-json experiment]]
+            ;[main.worlds :refer [worlds]]
             ["node:process" :as process]
             ["express" :as express]
             ["http" :as http]
@@ -33,9 +34,9 @@
     (.-clients wss)
     (fn [client] (.send client (t/write (t/writer :json) data)))))
 
-(defn ws-handler [{:keys [id player position quaternion] :as data}]
+(defn ws-handler [{:keys [id player position] :as data}]
   (case id
-    "movement" (swap! db assoc-in [:players (:located player) (:name player)] {:position position :quaternion quaternion});(broadcast-to-all data)
+    "movement" (swap! db assoc-in [:players (:located player) (:name player) :position] position);(broadcast-to-all data)
     (js/console.log "Unknown websocket message: "data))
   )
 
@@ -53,8 +54,7 @@
 
   (.on server "upgrade"
        (fn [request socket head]
-         (.handleUpgrade wss request socket head (fn [ws] (.emit wss "connection" ws request)))
-         ))
+         (.handleUpgrade wss request socket head (fn [ws] (.emit wss "connection" ws request)))))
     
   (.on wss "connection"
        (fn [ws req]

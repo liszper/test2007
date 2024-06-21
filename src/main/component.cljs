@@ -40,21 +40,22 @@
         _ (fiber/useFrame
             (fn [state]
               (let [position (.getWorldPosition (.-current wrapper) (new three/Vector3))
-                    nx (.toPrecision (.-x position) 5)
-                    ny (.toPrecision (.-y position) 3)
-                    nz (.toPrecision (.-z position) 5)
+                    nx (.toFixed (.parseFloat js/Number (.-x position)) 3)
+                    ny (.toFixed (.parseFloat js/Number (.-y position)) 2)
+                    nz (.toFixed (.parseFloat js/Number (.-z position)) 3)
                     quaternion (.getWorldQuaternion (.-current wrapper) (new three/Quaternion))
-                    nqx (.-x quaternion)
-                    nqy (.-y quaternion)
-                    nqz (.-z quaternion)
-                    nqw (.-w quaternion)]
+                    nqx (.toFixed (.parseFloat js/Number (.-x quaternion)) 3)
+                    nqy (.toFixed (.parseFloat js/Number (.-y quaternion)) 3)
+                    nqz (.toFixed (.parseFloat js/Number (.-z quaternion)) 3)
+                    nqw (.toFixed (.parseFloat js/Number (.-w quaternion)) 3)
+                    ]
                 (when-not (= nx x) (dispatch [:assoc-in [:player :position :x] nx]))
                 (when-not (= ny y) (dispatch [:assoc-in [:player :position :y] ny]))
                 (when-not (= nz z) (dispatch [:assoc-in [:player :position :z] nz]))
-                (when-not (= nqx qx) (dispatch [:assoc-in [:player :quaternion :qx] nqx]))
-                (when-not (= nqy qy) (dispatch [:assoc-in [:player :quaternion :qy] nqy]))
-                (when-not (= nqz qz) (dispatch [:assoc-in [:player :quaternion :qz] nqz]))
-                (when-not (= nqw qw) (dispatch [:assoc-in [:player :quaternion :qw] nqw]))
+                (when-not (= nqx qx) (dispatch [:assoc-in [:player :position :qx] nqx]))
+                (when-not (= nqy qy) (dispatch [:assoc-in [:player :position :qy] nqy]))
+                (when-not (= nqz qz) (dispatch [:assoc-in [:player :position :qz] nqz]))
+                (when-not (= nqw qw) (dispatch [:assoc-in [:player :position :qw] nqw]))
                 (when
                   (and
                     (or
@@ -69,9 +70,8 @@
                     player-name
                     environment-map)
                   (dispatch [:send {:id "movement"
-                                    :player {:name player-name :located environment-map}
-                                    :position {:x nx :y ny :z nz}
-                                    :quaternion {:qx nqx :qy nqy :qz nqz :qw nqw}}]))
+                                    :players {:name player-name :located environment-map}
+                                    :position {:x nx :y ny :z nz :qx nqx :qy nqy :qz nqz :qw nqw}}]))
                )))
         ]
     [:group {:ref wrapper}
@@ -79,15 +79,6 @@
       {:nickname player-name
        :position [0 -0.55 0]
        :quaternion [0 0 0 0]}]]))
-
-(defn other-player []
-  (let [{:keys [x y z]} @(subscribe [:get-in [:player :position]])
-        {:keys [qx qy qz qw]} @(subscribe [:get-in [:player :quaternion]])]
-    [:group {:position [z y x]}
-     [player-model
-      {:nickname "NPC"
-       :position [0 -0.55 0]
-       :quaternion [qx qy qz qw]}]]))
 
 (defn other-players []
   (let [
@@ -134,39 +125,34 @@
 (defn canvas []
   (let [
         environment-map @(subscribe [:get-in [:environment :map]])
-        {:keys [skybox lights gltf ost control objects]} (get maps environment-map)
+        {:keys [dynamic-environment skybox lights gltf ost control objects]} (get maps environment-map)
         music-play (when ost (new Howl #js {:src (clj->js ost) :loop true :autoplay true}))
         ]  
     [:> fiber/Canvas {:key environment-map :name environment-map :shadows "shadows" :onPointerDown (fn [e] (.requestPointerLock (.-target e)))}
      [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
-      ;[:> drei/Fisheye {:zoom 0.4} 
         skybox
         lights
 
+        (when dynamic-environment [dynamic-environment])
+
         [other-players] 
 
-        ;[other-player]     
-
         [:> rapier/Physics {:timeStep "vary" :debug (if debug? "debug" nil)}
-        
+         (when gltf [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} [:> drei/Gltf gltf]])
          [:> drei/KeyboardControls {:map keyboard-controls :debug? (if debug? true false) :debug "debug"}
-          [:> ecc/default (assoc control
-                                 ;:animated "animated"
-                                 :debug debug?
-                                 ;:followLight true
-                                 ;:springK 1.4
-                                 :controllerKeys {:forward 12 :backward 13 :leftward 14 :rightward 15 :jump 2}
-                                 )
+          [:> ecc/default 
+           (assoc control
+                  ;:animated "animated"
+                  :debug debug?
+                  ;:followLight true
+                  ;:springK 1.4
+                  :controllerKeys {:forward 12 :backward 13 :leftward 14 :rightward 15 :jump 2}
+                  )
            [:f> player]
            ]
           ]
-         
-         (when gltf [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} [:> drei/Gltf gltf]])
-        
          objects
          ]
-
-       ;]
       ]
      
      [:> drei/Stats]
@@ -250,7 +236,7 @@
          
            ;[:h1 (get chain :name)] 
            ;(when debug? 
-             [:h4 "Position: x:"x" y:"y" z:"z]
+             ;[:h4 "Position: x:"x" y:"y" z:"z]
              ;)
            ;[:> Button {:onClick #(dispatch [:send {:id "llama3" :message {:role "user" :content "Are you ready to play?"}}])} "Ask Llama3"]
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
