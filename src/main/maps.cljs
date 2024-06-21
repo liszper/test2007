@@ -65,7 +65,7 @@
      ]
     }
    
-   "OP Mainner";"Ethereum"
+   "OP Mainnet";"Ethereum"
    {
     :ost ["/ost/yellow_floating_sand_dune_world.mp3"] 
     :gltf 
