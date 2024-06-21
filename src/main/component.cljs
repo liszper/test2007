@@ -44,10 +44,10 @@
                     ny (.toFixed (.parseFloat js/Number (.-y position)) 2)
                     nz (.toFixed (.parseFloat js/Number (.-z position)) 3)
                     quaternion (.getWorldQuaternion (.-current wrapper) (new three/Quaternion))
-                    nqx (.toFixed (.parseFloat js/Number (.-x quaternion)) 3)
-                    nqy (.toFixed (.parseFloat js/Number (.-y quaternion)) 3)
-                    nqz (.toFixed (.parseFloat js/Number (.-z quaternion)) 3)
-                    nqw (.toFixed (.parseFloat js/Number (.-w quaternion)) 3)
+                    nqx (.-x quaternion)
+                    nqy (.-y quaternion)
+                    nqz (.-z quaternion)
+                    nqw (.-w quaternion)
                     ]
                 (when-not (= nx x) (dispatch [:assoc-in [:player :position :x] nx]))
                 (when-not (= ny y) (dispatch [:assoc-in [:player :position :y] ny]))
@@ -95,22 +95,11 @@
              {:keys [qx qy qz qw]} quaternion]
          [:group {:key (str player"-group")
                   :position [x y z]}
-          ;[:> Box]
-   [:> drei/Html {
-                  :style {:transform "translate(-50%, 0)"} :position [0 1 0]}
-    [:div {:style {:WebkitTextStroke "0.1rem #fff"}} player]] 
-    [:> Box]          
-   ;[:> drei/Gltf
-   ; {
-   ;  :position [x y z]
-   ;  :quaternion [qx qy qz qw]
-   ;  :scale 0.315
-   ;  :src "/npc/wizard.glb"}]
-          ;[player-model
-          ; {:key player 
-          ;  :nickname player
-          ;  :position [0 -0.55 0]
-          ;  :quaternion [qx qy qz qw]}]
+          [player-model
+           {:key player 
+            :nickname player
+            :position [0 -0.55 0]
+            :quaternion [qx qy qz qw]}]
           ]   
          ))]))
 

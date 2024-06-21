@@ -11,7 +11,7 @@
     ))
 
 (defn random [seed] (-> seed js/Math.sin (* 10000) js/Math.floor))
-(def prando (new default "new"))
+(def prando (new default "new2"))
 (defn prand-int [x y] (.nextInt prando x y))
 (defn prand [x y] (.next prando x y))
 
@@ -201,8 +201,10 @@
                  rx (* (/ (- (.-PI js/Math)) (prand-int 0 10)) (prand-int 0 10))
                  ry (* (/ (- (.-PI js/Math)) (prand-int 0 10)) (prand-int 0 10))
                  rz (* (/ (- (.-PI js/Math)) (prand-int 0 10)) (prand-int 0 10))
-                 color (str "#" (prand-int 0 9) "d" (prand-int 0 9))
-                 size [(inc (prand-int 0 25)) (inc (prand-int 0 4)) (inc (prand-int 0 25))]
+                 ;color (str "#" (prand-int 0 9) "d" (prand-int 0 9))
+                 color (str "#" "f" (prand-int 0 9) (prand-int 0 9))
+                 size [(inc (prand-int 0 50)) (inc (prand-int 0 40)) (inc (prand-int 0 50))]
+                 ;size [(inc (prand-int 0 25)) (inc (prand-int 0 4)) (inc (prand-int 0 25))]
                  ;size [(+ 5 (rand-int 20)) (inc (rand-int 10)) (+ 5 (rand-int 20))]
                  ]
              (when-not (and (< -100 x 100) (< -100 y 100) (< -100 z 100))
@@ -219,7 +221,7 @@
               (model/object 
                 {:position [x y z]
                  :scale 3
-                 :src "/npc/wizard_girl.glb"})
+                 :src "/npc/princess_felicity_fish_-_purple.glb"})
                 [:> rapier/RigidBody {:key "winner-box" :colliders "trimesh" :type "fixed"} 
                [:> drei/Box {
                              :args [25 4 25]

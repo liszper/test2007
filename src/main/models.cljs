@@ -37,7 +37,7 @@
 
 (defn platform-model [{:keys [i ii size x y z rx ry rz color]}]
   [:group {:key (str "box"(+ (* ii 1000)i))}
-   [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} 
+   [:> rapier/RigidBody {:colliders "cuboid" :args size :type "fixed"} 
     [:> drei/Box {:args size :position [x y z] :rotation [rx ry rz]}
      [:meshStandardMaterial {:color color}]]]])
 
