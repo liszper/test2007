@@ -95,11 +95,23 @@
              {:keys [qx qy qz qw]} quaternion]
          [:group {:key (str player"-group")
                   :position [x y z]}
-          [player-model
-           {:key player 
-            :nickname (str player quaternion)
-            :position [0 -0.55 0]
-            :quaternion [qx qy qz qw]}]]   
+          ;[:> Box]
+   [:> drei/Html {
+                  :style {:transform "translate(-50%, 0)"} :position [0 1 0]}
+    [:div {:style {:WebkitTextStroke "0.1rem #fff"}} player]] 
+    [:> Box]          
+   ;[:> drei/Gltf
+   ; {
+   ;  :position [x y z]
+   ;  :quaternion [qx qy qz qw]
+   ;  :scale 0.315
+   ;  :src "/npc/wizard.glb"}]
+          ;[player-model
+          ; {:key player 
+          ;  :nickname player
+          ;  :position [0 -0.55 0]
+          ;  :quaternion [qx qy qz qw]}]
+          ]   
          ))]))
 
 (def animation-set

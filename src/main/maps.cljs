@@ -11,7 +11,7 @@
     ))
 
 (defn random [seed] (-> seed js/Math.sin (* 10000) js/Math.floor))
-(def prando (new default "fix"))
+(def prando (new default "new"))
 (defn prand-int [x y] (.nextInt prando x y))
 (defn prand [x y] (.next prando x y))
 
@@ -191,7 +191,7 @@
                 ;{:ii 1 :q 500 :gx 300 :gy 5 :gz 300}
                 {:ii 2 :q 500 :gx 300 :gy 50 :gz 300}
                 {:ii 3 :q 500 :gx 300 :gy 250 :gz 300}
-                {:ii 4 :q 500 :gx 300 :gy 1000 :gz 300}
+                {:ii 4 :q 1000 :gx 300 :gy 1000 :gz 300}
                 ]
               ]
          (for [i (range q)]
