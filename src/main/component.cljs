@@ -52,10 +52,10 @@
                 (when-not (= nx x) (dispatch [:assoc-in [:player :position :x] nx]))
                 (when-not (= ny y) (dispatch [:assoc-in [:player :position :y] ny]))
                 (when-not (= nz z) (dispatch [:assoc-in [:player :position :z] nz]))
-                (when-not (= nqx qx) (dispatch [:assoc-in [:player :position :qx] nqx]))
-                (when-not (= nqy qy) (dispatch [:assoc-in [:player :position :qy] nqy]))
-                (when-not (= nqz qz) (dispatch [:assoc-in [:player :position :qz] nqz]))
-                (when-not (= nqw qw) (dispatch [:assoc-in [:player :position :qw] nqw]))
+                (when-not (= nqx qx) (dispatch [:assoc-in [:player :quaternion :qx] nqx]))
+                (when-not (= nqy qy) (dispatch [:assoc-in [:player :quaternion :qy] nqy]))
+                (when-not (= nqz qz) (dispatch [:assoc-in [:player :quaternion :qz] nqz]))
+                (when-not (= nqw qw) (dispatch [:assoc-in [:player :quaternion :qw] nqw]))
                 (when
                   (and
                     (or
@@ -70,8 +70,9 @@
                     player-name
                     environment-map)
                   (dispatch [:send {:id "movement"
-                                    :players {:name player-name :located environment-map}
-                                    :position {:x nx :y ny :z nz :qx nqx :qy nqy :qz nqz :qw nqw}}]))
+                                    :player {:name player-name :located environment-map}
+                                    :position {:x nx :y ny :z nz}
+                                    :quaternion {:qx nqx :qy nqy :qz nqz :qw nqw}}]))
                )))
         ]
     [:group {:ref wrapper}
@@ -95,8 +96,8 @@
          [:group {:key (str player"-group")
                   :position [x y z]}
           [player-model
-           {:key (str player"-model-in"environment-map)
-            :nickname player
+           {:key player 
+            :nickname (str player quaternion)
             :position [0 -0.55 0]
             :quaternion [qx qy qz qw]}]]   
          ))]))

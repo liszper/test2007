@@ -34,9 +34,13 @@
     (.-clients wss)
     (fn [client] (.send client (t/write (t/writer :json) data)))))
 
-(defn ws-handler [{:keys [id player position] :as data}]
+(defn ws-handler [{:keys [id player position quaternion] :as data}]
   (case id
-    "movement" (swap! db assoc-in [:players (:located player) (:name player) :position] position);(broadcast-to-all data)
+    "movement" 
+    ;(do 
+      (swap! db assoc-in [:players (:located player) (:name player)] {:position position :quaternion quaternion})
+      ;(js/console.log (str @db))
+     ; );(broadcast-to-all data)
     (js/console.log "Unknown websocket message: "data))
   )
 

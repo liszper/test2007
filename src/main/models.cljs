@@ -28,8 +28,8 @@
    [:> drei/Gltf
     {
      :key (str "gltf-player"(:key p))
-     :castShadow "castShadow"
-     :receiveShadow "receiveShadow"
+     ;:castShadow "castShadow"
+     ;:receiveShadow "receiveShadow"
      :position position
      :quaternion quaternion
      :scale 0.315
