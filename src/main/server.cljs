@@ -80,9 +80,9 @@
   
   (.listen server (or (.-PORT (.-env process)) 5000))
 
-  (llama3 "Write a greeting in ASCII art. Don't explain what you are doing just send me the ASCII art and the greeting. Be nerdy and funny, your audience is programmers.")
+  ;(llama3 "Write a greeting in ASCII art. Don't explain what you are doing just send me the ASCII art and the greeting. Be nerdy and funny, your audience is programmers.")
   
-  (experiment)
+  ;(experiment)
   ;(ask-json "How are you?")
   ;(ask-json "Write me a poem")
   ;(ask-json "Create a simple data structure")
