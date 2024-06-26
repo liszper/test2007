@@ -37,23 +37,28 @@
         (reset! prev-logged-db @db)))
     1000))
 
-(defn ^:export init []
-
-  ;(logging)
-
+(defn multiplayer-broadcast []
   (js/setInterval
     (fn []
       (when (not= @db @prev-db)
         (doseq [[id {:keys [client]}] (:players @private-db)]
-          (.send client (t/write (t/writer :json)
-                                            (-> @db
-                                              (assoc :id "movement")
-                                              (update :players (fn [m] (fmap #(dissoc % id) m)))
-                                              )))
-          )
+          (.send client 
+                 (t/write 
+                   (t/writer :json)
+                   (-> @db
+                       (assoc :id "movement")
+                       (update :players (fn [m] (fmap #(dissoc % id) m)))
+                       ))))
         (reset! prev-db @db)))
     1;17
     )
+  )
+
+(defn ^:export init []
+
+  ;(logging)
+
+  (multiplayer-broadcast)
 
   (.use app "/" (.static express "public/app"))
 
@@ -63,10 +68,11 @@
     
   (.on wss "connection"
        (fn [ws req]
-         (let [new-user-id (get (js->clj (.-headers req)) "sec-websocket-key")
-               new-user {:user-agent (get (js->clj (.-headers req)) "user-agent")
-                         :ip (.-remoteAddress (.-_socket ws))
-                         :client ws}]
+         (let [new-user-id (str (rand-int 100000000));(get (js->clj (.-headers req)) "sec-websocket-key")
+               new-user {;:user-agent (get (js->clj (.-headers req)) "user-agent")
+                         ;:ip (.-remoteAddress (.-_socket ws))
+                         :client ws}
+               ]
           (swap! private-db assoc-in [:players new-user-id] new-user)
           (js/console.log "Websocket connection initiated..")
           (.on ws "error" (.-error js/console))
