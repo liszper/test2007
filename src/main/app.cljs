@@ -2,6 +2,7 @@
 (ns main.app
   (:require [main.wagmi :refer [bundle]]
             [main.guild :refer [Guild]]
+            [main.models :refer [avatars]]
             
             [reagent.core :as reagent]
             [reagent.dom  :as reagent-dom] 
@@ -72,22 +73,10 @@
 
 
 
-(def mini-wizard
-  {:src "/npc/wizard.glb"
-   :scale 0.1
-   :position [0 -0.9 0]
-   :nickname-position [0 0.2 0]
-   })
+
 
 (def default-db-state
-  {:player
-      {:avatar
-       {:src "/npc/wizard.glb"
-        :scale 1
-        :position [0 -0.65 0]
-        :springK 0
-        :nickname-position [0 2 0]
-        }}})
+  {:player {:avatar (:wizard avatars)}})
 
 (defn ^:export init []
   

@@ -1,7 +1,7 @@
 
 (ns main.component
   (:require [main.maps :refer [maps]]
-            [main.models :refer [loading] :as model]
+            [main.models :refer [loading avatars] :as model]
             [main.wagmi :refer [connect-kit]]
             [main.guild :refer [join-guild]]
     
@@ -188,6 +188,7 @@
         points @(subscribe [:get-in [:guilds :points]])
         address-a @(subscribe [:get-in [:address]])
         located @(subscribe [:get-in [:player :located]])
+        avatar @(subscribe [:get-in [:player :avatar :name]])
         ;{:keys [located x y z qx qy qz qw]} @(subscribe [:get-in [:player]])
         ]
         [:> Grid
@@ -216,10 +217,14 @@
              ;[:h4 "Position: x:"x" y:"y" z:"z]
              ;)
            ;[:> Button {:onClick #(dispatch [:send {:id "llama3" :message {:role "user" :content "Are you ready to play?"}}])} "Ask Llama3"]
-           [:> Button {:onClick #(dispatch [:assoc-in [:update-physics?] (rand-int 100000)])} "Update Physics"]
+           ;[:> Button {:onClick #(dispatch [:assoc-in [:update-physics?] (rand-int 100000)])} "Update Physics"]
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
            [:f> connect-kit]
            (when (and (= status "connected") (nil? guild-data)) [:> Button {:onClick #(join-guild)} "Join the Onchain guild"])
+           (case avatar
+             :wizard [:> Button {:onClick #(dispatch [:assoc-in [:player :avatar] (:ghost avatars)])} "Turn into a Ghost"]
+             :ghost [:> Button {:onClick #(dispatch [:assoc-in [:player :avatar] (:wizard avatars)])} "Become a Wizard again"]
+             nil)
            ;(str guild-data)
        
            (when (and (= status "connected") guild-data) [:h1 "Skills"])
