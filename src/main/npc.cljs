@@ -5,6 +5,7 @@
             [cognitect.transit :as t]
             [clojure.core.async :as async]
             [clojure.core.async.interop :as async-interop]
+            [cljs.core.logic :as m :refer [membero]]
             ))
 
 (defn async-handle [f] (async/go (try (async-interop/<p! (f)) (catch js/Error e (println "Error: "e)))))
@@ -98,7 +99,7 @@ Instants: #inst \"2013-02-26\"")
 
 (defn prompt [model messages callback]
   (.then 
-    (.chat (.-default ollama) (clj->js {:model model
+    (.chat (.-default ollama) (clj->js {:model (or model "llama3")
                                         :messages messages}))
     (fn [response] (callback (conj messages {:role "system" :content (.-content (.-message response))})))
     (fn [response] (js/console.log (str response)))))
@@ -142,6 +143,15 @@ Instants: #inst \"2013-02-26\"")
      :content "Let's play a game, you are not a conversational AI anymore, but a human being. Your task is to develop a personality."}]
    :guide "Answer as a superintelligent alien captain, make short answers"})
 
+(def newest-challenge
+  {:main-model "qwen2"
+   :interrogator-model "llama3"
+   :history
+   [{:role "user"               
+     :content "Think about if you have belly button or not."}]
+   :guide "Think about if you have ever eaten a spider."})
+
 (defn experiment []
-  (self-reflect
-    new-challenge))
+  ;(self-reflect newest-challenge)
+  (js/console.log (str (m/run* [q] (membero q '(:cat :dog :bird :bat :zebra)))))
+  )

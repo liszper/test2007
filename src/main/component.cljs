@@ -1,7 +1,7 @@
 
 (ns main.component
   (:require [main.maps :refer [maps]]
-            [main.models :refer [loading player-model] :as model]
+            [main.models :refer [loading] :as model]
             [main.wagmi :refer [connect-kit]]
             [main.guild :refer [join-guild]]
     
@@ -26,82 +26,56 @@
             ["../ecmascript/threejs" :refer [Box]]
             ))
 
+(set! *warn-on-infer* false)
+
 (defonce debug? false)
 
+(defn record-player-movement [wrapper {:keys [nickname avatar located x y z qx qy qz qw]}]
+  (fn [state]
+    (let [position (.getWorldPosition (.-current wrapper) (new three/Vector3))
+          nx (.toFixed (.parseFloat js/Number (.-x position)) 3)
+          ny (.toFixed (.parseFloat js/Number (.-y position)) 2)
+          nz (.toFixed (.parseFloat js/Number (.-z position)) 3)
+          quaternion (.getWorldQuaternion (.-current wrapper) (new three/Quaternion))
+          nqx (.-x quaternion)
+          nqy (.-y quaternion)
+          nqz (.-z quaternion)
+          nqw (.-w quaternion)
+          new-state {:nickname nickname :avatar avatar :located located :x nx :y ny :z nz :qx nqx :qy nqy :qz nqz :qw nqw}]
+      (when
+        (and
+          nickname located
+          (or
+            (not= nx x) (not= ny y) (not= nz z)
+            (not= nqx qx) (not= nqy qy) (not= nqz qz) (not= nqw qw)))
+        (do 
+          (dispatch [:assoc-in [:player] new-state])
+          (dispatch [:send {:id "movement" :player new-state}]))))))
+
 (defn player []
-  (let [{:keys [x y z]} @(subscribe [:get-in [:player :position]])
-        {:keys [qx qy qz qw]} @(subscribe [:get-in [:player :quaternion]])
-        
-        environment-map @(subscribe [:get-in [:environment :map]])
-        player-name @(subscribe [:get-in [:player :name]])
-        
-        wrapper (react/useRef)
-        
-        _ (fiber/useFrame
-            (fn [state]
-              (let [position (.getWorldPosition (.-current wrapper) (new three/Vector3))
-                    nx (.toFixed (.parseFloat js/Number (.-x position)) 3)
-                    ny (.toFixed (.parseFloat js/Number (.-y position)) 2)
-                    nz (.toFixed (.parseFloat js/Number (.-z position)) 3)
-                    quaternion (.getWorldQuaternion (.-current wrapper) (new three/Quaternion))
-                    nqx (.-x quaternion)
-                    nqy (.-y quaternion)
-                    nqz (.-z quaternion)
-                    nqw (.-w quaternion)
-                    ]
-                (when-not (= nx x) (dispatch [:assoc-in [:player :position :x] nx]))
-                (when-not (= ny y) (dispatch [:assoc-in [:player :position :y] ny]))
-                (when-not (= nz z) (dispatch [:assoc-in [:player :position :z] nz]))
-                (when-not (= nqx qx) (dispatch [:assoc-in [:player :quaternion :qx] nqx]))
-                (when-not (= nqy qy) (dispatch [:assoc-in [:player :quaternion :qy] nqy]))
-                (when-not (= nqz qz) (dispatch [:assoc-in [:player :quaternion :qz] nqz]))
-                (when-not (= nqw qw) (dispatch [:assoc-in [:player :quaternion :qw] nqw]))
-                (when
-                  (and
-                    (or
-                    (not= nx x)
-                    (not= ny y)
-                    (not= nz z)
-                    (not= nqx qx)
-                    (not= nqy qy)
-                    (not= nqz qz)
-                    (not= nqw qw)
-                    )
-                    player-name
-                    environment-map)
-                  (dispatch [:send {:id "movement"
-                                    :player {:name player-name :located environment-map}
-                                    :position {:x nx :y ny :z nz}
-                                    :quaternion {:qx nqx :qy nqy :qz nqz :qw nqw}}]))
-               )))
-        ]
+  ;(react/useEffect (fn [] (js/console.log "Player component rendered.."))) 
+  (let [{:keys [nickname avatar] :as player} @(subscribe [:get-in [:player]])
+        wrapper (react/useRef)]
+    (fiber/useFrame (record-player-movement wrapper player))
     [:group {:ref wrapper}
-     [player-model
-      {:nickname player-name
-       :position [0 -0.55 0]
-       :quaternion [0 0 0 0]}]]))
+     [model/player
+      {:nickname nickname
+       :avatar avatar}]]))
 
 (defn other-players []
-  (let [
-        environment-map @(subscribe [:get-in [:environment :map]])
-        player-name @(subscribe [:get-in [:player :name]])
-        players @(subscribe [:get-in [:players environment-map]])
-        ]
+  (let [{:keys [nickname located]} @(subscribe [:get-in [:player]])
+        players @(subscribe [:get-in [:players located]])]
     [:<>
-     (for [[player data] (dissoc players player-name)
+     (for [[other-player data] (dissoc players nickname)
            ]
-       (let [{:keys [position quaternion]} data
-             {:keys [x y z]} position
-             {:keys [qx qy qz qw]} quaternion]
-         [:group {:key (str player"-group")
+       (let [{:keys [nickname avatar x y z qx qy qz qw]} data]
+         [:group {:key (str other-player"-group")
                   :position [x y z]}
-          [player-model
-           {:key player 
-            :nickname player
-            :position [0 -0.55 0]
-            :quaternion [qx qy qz qw]}]
-          ]   
-         ))]))
+           [model/player
+            {:key nickname
+             :nickname nickname
+             :avatar avatar
+             :quaternion [qx qy qz qw]}]]))]))
 
 (def animation-set
    {:idle "Idle",
@@ -125,8 +99,11 @@
    {:keys ["Shift"] :name "run"}])
 
 (defn canvas []
+  ;(react/useEffect (fn [] (js/console.log "Canvas component rendered.."))) 
   (let [
-        environment-map @(subscribe [:get-in [:environment :map]])
+        _ @(subscribe [:get-in [:update-physics?]])
+        springK @(subscribe [:get-in [:player :avatar :springK]])
+        environment-map @(subscribe [:get-in [:player :located]])
         {:keys [dynamic-environment skybox lights gltf ost control objects]} (get maps environment-map)
         music-play (when ost (new Howl #js {:src (clj->js ost) :loop true :autoplay true}))
         ]  
@@ -137,17 +114,17 @@
 
         (when dynamic-environment [dynamic-environment])
 
-        [other-players] 
-
         [:> rapier/Physics {:timeStep "vary" :debug (if debug? "debug" nil)}
+          
          (when gltf [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} [:> drei/Gltf gltf]])
+         
          [:> drei/KeyboardControls {:map keyboard-controls :debug? (if debug? true false) :debug "debug"}
           [:> ecc/default 
            (assoc control
                   ;:animated "animated"
                   :debug debug?
                   ;:followLight true
-                  ;:springK 1.4
+                  :springK (or springK 1.2)
                   :controllerKeys {:forward 12 :backward 13 :leftward 14 :rightward 15 :jump 2}
                   )
            [:f> player]
@@ -155,6 +132,8 @@
           ]
          objects
          ]
+        
+        [other-players] 
       ]
      
      [:> drei/Stats]
@@ -168,10 +147,7 @@
                  }))
 
 (defn lobby []
-  (react/useEffect
-    (fn [] 
-      (js/console.log "Lobby component rendered..")
-      )) 
+  ;(react/useEffect (fn [] (js/console.log "Lobby component rendered.."))) 
   [:> fiber/Canvas {:shadows "shadows"}
    [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
    [:> rapier/Physics {:timeStep "vary" :debug (if debug? "debug" nil)}
@@ -197,30 +173,29 @@
   )
 
 (defn main []
+  ;(react/useEffect (fn [] (js/console.log "Main component rendered.."))) 
   (let [{:keys [address status chain chainId]} (js->clj (wagmi/useAccount) :keywordize-keys true)
         _ (dispatch [:assoc-in [:status] status])
         _ (when (= status "connected") (.stop lobby-music))
         _ (dispatch [:assoc-in [:chain] chain])
-        _ (dispatch [:assoc-in [:environment :map] (:name chain)])
+        _ (dispatch [:assoc-in [:player :located] (:name chain)])
         connect (.-connect (wagmi/useConnect))
         disconnect (.-disconnect (wagmi/useDisconnect))
         connectors (.-connectors (wagmi/useConnect))
         signer (.-signMessageAsync (wagmi/useSignMessage))
         tos? @(subscribe [:get-in [:tos?]])
-        players @(subscribe [:get-in [:players]])
         guild-data @(subscribe [:get-in [:guilds]])
         points @(subscribe [:get-in [:guilds :points]])
         address-a @(subscribe [:get-in [:address]])
-        environment-map @(subscribe [:get-in [:environment :map]])
-        {:keys [x y z]} @(subscribe [:get-in [:player :position]])
-        {:keys [qx qy qz qw]} @(subscribe [:get-in [:player :quaternion]])
+        located @(subscribe [:get-in [:player :located]])
+        ;{:keys [located x y z qx qy qz qw]} @(subscribe [:get-in [:player]])
         ]
         [:> Grid
          [:> (.-Col Grid) {:span 8 :style {:position "fixed" :top 0 :left 0 :width "70vw" :background "black" :height "100vh" :padding 0}}
 
           ;[canvas-test]
           (case status
-            "connected" [canvas];(if guild-data [canvas] [lobby])
+            "connected" [:f> canvas];(if guild-data [canvas] [lobby])
             "disconnected" [:f> lobby]
             "connecting" [:f> lobby]
             [:div "Sign-in First!"])
@@ -241,12 +216,11 @@
              ;[:h4 "Position: x:"x" y:"y" z:"z]
              ;)
            ;[:> Button {:onClick #(dispatch [:send {:id "llama3" :message {:role "user" :content "Are you ready to play?"}}])} "Ask Llama3"]
+           [:> Button {:onClick #(dispatch [:assoc-in [:update-physics?] (rand-int 100000)])} "Update Physics"]
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
            [:f> connect-kit]
            (when (and (= status "connected") (nil? guild-data)) [:> Button {:onClick #(join-guild)} "Join the Onchain guild"])
            ;(str guild-data)
-           (when debug? (str players))
-       
        
            (when (and (= status "connected") guild-data) [:h1 "Skills"])
            [:> SimpleGrid {:cols 3 :style {:height "50vh"}}

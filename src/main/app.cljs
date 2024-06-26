@@ -1,7 +1,7 @@
 
 (ns main.app
   (:require [main.wagmi :refer [bundle]]
-            [main.guild :refer [Guild fetch-guild]]
+            [main.guild :refer [Guild]]
             
             [reagent.core :as reagent]
             [reagent.dom  :as reagent-dom] 
@@ -54,30 +54,44 @@
 
 
 (def websocket (atom nil))
-(rf/reg-fx :send (fn [opts [_ _]] (.send @websocket (t/write (t/writer :json) (:message opts)))))
+(rf/reg-fx :send (fn [opts [_ _]] (when (and @websocket (.-readyState @websocket)) (.send @websocket (t/write (t/writer :json) (:message opts))))))
 (rf/reg-event-fx :send (fn [{db :db} [_ opts]] {:send {:message opts :db db}}))
+
+(defn ws-handler [{:keys [id players] :as message}]
+  (case id
+    "movement" (dispatch [:assoc-in [:players] players])
+    (js/console.log (str message))))
 
 (defn ws-connect [uri]
   (let [ws (new js/WebSocket uri)]
     (reset! websocket ws)
-    (set! (.-onmessage ws)
-          (fn [event]
-            (let [{:keys [id players] :as data} (t/read (t/reader :json) (.-data event))]
-              (case id
-                "movement" (dispatch [:assoc-in [:players] players])
-                nil))))
-    (set! (.-onopen ws) (fn [] 
-                          (.log js/console "Websocket connection established.")
-                          ))
+    (set! (.-onmessage ws) (fn [event] (ws-handler (t/read (t/reader :json) (.-data event)))))
+    (set! (.-onopen ws) (fn [] (js/console.log "Websocket connection established.")))
     (set! (.-onerror ws) (.-error js/console))))
 
 
 
 
+(def mini-wizard
+  {:src "/npc/wizard.glb"
+   :scale 0.1
+   :position [0 -0.9 0]
+   :nickname-position [0 0.2 0]
+   })
+
+(def default-db-state
+  {:player
+      {:avatar
+       {:src "/npc/wizard.glb"
+        :scale 1
+        :position [0 -0.65 0]
+        :springK 0
+        :nickname-position [0 2 0]
+        }}})
 
 (defn ^:export init []
   
-  (rf/dispatch-sync [:reset {}])
+  (rf/dispatch-sync [:reset default-db-state])
 
   (render)
 

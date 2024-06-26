@@ -9,50 +9,51 @@
             [cognitect.transit :as t]
             ))
 
+(defn fmap [f m] (into {} (for [[k v] m] [k (f v)])))
+
 (set! *warn-on-infer* false)
 
 (def db (atom {}))
 (def prev-db (atom {}))
+(def prev-logged-db (atom {}))
+
+(def private-db (atom {}))
 
 (def app (express))
 (def server (http/createServer app))
 (def wss (new ws/WebSocketServer #js {:noServer true}))
 
-(defn get-ip-address [ws] (.-remoteAddress (.-_socket ws)))
-
-(defn scan-all []
-  (let [clients (.-clients wss)
-        ip-addresses (mapv get-ip-address clients)
-        ]
-    (js/console.log "IP Addresses: ")
-    (js/console.log (clj->js ip-addresses))
-    ) 
-  )
-
-(defn broadcast-to-all [data]
-  (.forEach
-    (.-clients wss)
-    (fn [client] (.send client (t/write (t/writer :json) data)))))
-
-(defn ws-handler [{:keys [id player position quaternion] :as data}]
+(defn ws-handler [{:keys [id player] :as data} user-id {:keys [user-agent ip]}]
   (case id
-    "movement" 
-    ;(do 
-      (swap! db assoc-in [:players (:located player) (:name player)] {:position position :quaternion quaternion})
-      ;(js/console.log (str @db))
-     ; );(broadcast-to-all data)
-    (js/console.log "Unknown websocket message: "data))
-  )
+    "movement" (swap! db assoc-in [:players (:located player) user-id] (assoc player :id user-id))
+    nil))
+
+(defn logging []
+  (js/setInterval
+    (fn []
+      (when (not= @db @prev-logged-db)
+        (js/console.log (str @private-db))
+        (js/console.log (str @db))
+        (reset! prev-logged-db @db)))
+    1000))
 
 (defn ^:export init []
 
+  ;(logging)
 
   (js/setInterval
     (fn []
       (when (not= @db @prev-db)
-        (broadcast-to-all (assoc @db :id "movement"))
+        (doseq [[id {:keys [client]}] (:players @private-db)]
+          (.send client (t/write (t/writer :json)
+                                            (-> @db
+                                              (assoc :id "movement")
+                                              (update :players (fn [m] (fmap #(dissoc % id) m)))
+                                              )))
+          )
         (reset! prev-db @db)))
-    17)
+    1;17
+    )
 
   (.use app "/" (.static express "public/app"))
 
@@ -62,23 +63,26 @@
     
   (.on wss "connection"
        (fn [ws req]
-         ;(scan-all)
-         (.on ws "error" (.-error js/console))
-         (.on ws "close" (fn  [req] (js/console.log "Websocket connection closed..")))
-         (.on ws "message"
-              (fn [raw-data]
-                (let [data (t/read (t/reader :json) raw-data)
-                      ]
-                  (ws-handler data))
-                ))
-         ;(.send ws (t/write (t/writer :json) {:test "Message"}))
+         (let [new-user-id (get (js->clj (.-headers req)) "sec-websocket-key")
+               new-user {:user-agent (get (js->clj (.-headers req)) "user-agent")
+                         :ip (.-remoteAddress (.-_socket ws))
+                         :client ws}]
+          (swap! private-db assoc-in [:players new-user-id] new-user)
+          (js/console.log "Websocket connection initiated..")
+          (.on ws "error" (.-error js/console))
+          (.on ws "close" (fn  [req]
+                            (swap! db update :players (fn [m] (fmap #(dissoc % new-user-id) m)))
+                            (swap! private-db update-in [:players] dissoc new-user-id)
+                            (js/console.log "Websocket connection closed..")))
+          (.on ws "message" (fn [data] (ws-handler (t/read (t/reader :json) data) new-user-id new-user)))
+          )
          ))
   
   (.listen server (or (.-PORT (.-env process)) 5000))
 
-  ;(llama3 "Write a greeting in ASCII art. Don't explain what you are doing just send me the ASCII art and the greeting. Be nerdy and funny, your audience is programmers.")
+  (llama3 "Write a greeting in ASCII art. Don't explain what you are doing just send me the ASCII art and the greeting. Be nerdy and funny, your audience is programmers.")
   
-  ;(experiment)
+  (experiment)
   ;(ask-json "How are you?")
   ;(ask-json "Write me a poem")
   ;(ask-json "Create a simple data structure")

@@ -43,17 +43,18 @@
   ;    (js/console.log "Connect kit rendered..")
   ;   )) 
   (let [{:keys [address chain chainId]} (js->clj (wagmi/useAccount) :keywordize-keys true)
-        _ (dispatch [:assoc-in [:address] address])
         sign-message (.-signMessageAsync (wagmi/useSignMessage))
         signer (.custom guild/createSigner (fn [message] (sign-message #js {:message message})) address)
-        _ (when address (dispatch [:init-in [:signer-fn] signer]))
         connect (.-connect (wagmi/useConnect))
         ens-name (js->clj (wagmi/useEnsName #js {:address address}) :keywordize-keys true)
         player-name (or (:data ens-name) address)
-        _ (dispatch [:assoc-in [:player :name] player-name])
         disconnect (.-disconnect (wagmi/useDisconnect))
         connectors (.-connectors (wagmi/useConnect))
         signer (.-signMessageAsync (wagmi/useSignMessage))]    
+        
+    (dispatch [:assoc-in [:address] address])
+    (when address (dispatch [:init-in [:signer-fn] signer]))
+    (dispatch [:assoc-in [:player :nickname] player-name])
     
     (if address
      
