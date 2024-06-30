@@ -45,7 +45,6 @@
          (for [settings clouds]
            (let [] [:> drei/Cloud settings]))])
 
-
 (def avatars
   {
    :wizard
@@ -53,8 +52,8 @@
     :src "/npc/wizard.glb"
     :scale 1
     :position [0 -0.65 0]
-    :springK 0
-    :dampingC 0
+    ;:springK 0
+    ;:dampingC 0
     :nickname-position [0 2 0]}
 
    :ghost

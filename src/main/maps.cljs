@@ -8,6 +8,8 @@
             ["@react-three/rapier" :as rapier]
             ["prando" :refer [default]]
             [main.models :as model]
+            
+            ;["../ecmascript/threejs" :refer [Box Instances]]
     ))
 
 (defn random [seed] (-> seed js/Math.sin (* 10000) js/Math.floor))
@@ -272,8 +274,9 @@
 
               ]
     }
-"Ethereum"
+"Ethereum-solid-jumping"
 {
+    :ost ["/ost/In_the_depths_of_Farcaster.mp3"] 
     :control {
               :maxVelLimit 10 ; Maximum velocity limit
               :turnVelMultiplier 0.2 ; Turn velocity multiplier
@@ -420,4 +423,197 @@
                )
               ]
     }
+"Ethereum-minimage-2-descent-into-the-labyrinth"
+{
+    :control {
+              :maxVelLimit 20
+              }
+    :skybox [:> drei/Environment {:files "/skyboxes/background.hdr" :ground {:scale 100}}]
+    :ost [
+          "/ost/lounge_music_1.mp3"
+          "/ost/lounge_music_2.mp3"
+          "/ost/lounge_music_3.mp3"
+          ] 
+    :objects 
+    [:<>
+     [:> drei/Stars {:radius 600 :depth 100 :count 20000 :factor 15 :saturation 0 :fade "fade" :speed 0.01 :frustumCulled false :logarithmicDepthBuffer true}]
+     [:> drei/Sky {:turbidity 10 :rayleigh 3 :mieCoefficient 0.005 :mieDirectionalG 0.7 :elevation 21.4 :azimuth 180 :exposure 0.5}]
+     [:hemisphereLight {:position [0 100 0] :color "#fff" :groundColor "#ddd"}]
+     [:pointLight {:decay 0 :intensity 2 :position [0 300 0]}]
+     [:fog {:attach "fog" :args #js ["#fff" 0.1 250]}]
+
+     [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} 
+      [:> drei/Box {:args [6 5 6] :position [0 -5 0] :rotation [0 0 0]}
+       [:meshStandardMaterial {:color "#00f"}]]]
+    
+     [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} 
+      [:> drei/Box {:args [600 5 600] :position [0 -425 0] :rotation [0 0 0]}
+       [:meshStandardMaterial {:color "#00f"}]]]
+    
+     [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} 
+      [:> drei/Box {:args [50 425 1] :position [0 -210 -25] :rotation [0 0 0]} [:meshStandardMaterial {:color "#000"}]]
+      [:> drei/Box {:args [50 425 1] :position [0 -210 25] :rotation [0 0 0]} [:meshStandardMaterial {:color "#000"}]]
+      
+      [:> drei/Box {:args [1 425 50] :position [25 -210 0] :rotation [0 0 0]} [:meshStandardMaterial {:color "#000"}]]
+      [:> drei/Box {:args [1 425 50] :position [-25 -210 0] :rotation [0 0 0]} [:meshStandardMaterial {:color "#000"}]]
+      ]
+    
+     (let [instances 
+           (mapv
+             (fn [i]
+               {:key (str "key"i)
+                :args [5 10 20]
+                :position [(- (rand-int 50) 25) (- (rand-int 400) 420) (- (rand-int 50) 25)]
+                :rotation [0 0 0]
+                :scale (rand 4)
+                :color "tomato"})
+             (range 250))]
+       [:> rapier/InstancedRigidBodies {:instances instances :type "fixed"}
+        [:instancedMesh {:args #js [10 10 250] :frustumCulled false}
+         [:boxGeometry {:args #js [8 1 8]}]
+         [:meshStandardMaterial {:color "#00f"}]]])
+     
+     (let [instances 
+           (mapv
+             (fn [i]
+               {:key (str "key"i)
+                :args [5 10 20]
+                :position [(- (rand-int 50) 25) (- (rand-int 400) 420) (- (rand-int 50) 25)]
+                :rotation [0 0 0]
+                :scale (rand 4)
+                :color "tomato"})
+             (range 250))]
+       [:> rapier/InstancedRigidBodies {:instances instances :type "fixed"}
+        [:instancedMesh {:args #js [10 10 250] :frustumCulled false}
+         [:boxGeometry {:args #js [8 1 8]}]
+         [:meshStandardMaterial {:color "#0f0"}]]])
+
+     [:> drei/Instances {:limit 10000}; :range 1000}
+      [:boxGeometry]
+      [:meshStandardMaterial]
+      (for [
+               {:keys [ii q gx gy gz]} 
+               [
+                {:ii 4 :q 0 :gx 100 :gy 100 :gz 100}
+                ]
+              ]
+         (for [i (range q)]
+           (let [x (- (rand gx) (rand gx))
+                 y (prand-int 0 gy)
+                 z (- (rand gz) (rand gz))
+                 color (str "#" "f" (prand-int 0 9) (prand-int 0 9))
+                 size [(inc (prand-int 1 5)) (inc (prand-int 1 4)) (inc (prand-int 1 5))]]
+             
+             [:> drei/Instance {:color color :scale 1 :size size :position [x y z]}]
+             )))]
+              ]
+    }
+
+"Ethereum"
+{
+    :control {
+              :maxVelLimit 5
+              }
+    :ost [
+          "/ost/lounge_music_2.mp3"
+          "/ost/lounge_music_3.mp3"
+          ] 
+    :objects 
+    [:<>
+     [:> drei/Sky {:turbidity 10 :rayleigh 3 :mieCoefficient 0.005 :mieDirectionalG 0.7 :elevation 21.4 :azimuth 180 :exposure 0.5}]
+     [:hemisphereLight {:position [0 100 0] :color "#fff" :groundColor "#ddd"}]
+     [:pointLight {:decay 0 :intensity 2 :position [0 300 0]}]
+
+     [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} 
+      [:> drei/Box {:args [600 5 600] :position [0 -5 0] :rotation [0 0 0]}
+       [:meshStandardMaterial {:color "#ddd"}]]]
+    
+     (let [instances 
+           (mapv
+             (fn [i]
+               {:key (str "key"i)
+                :position [(- (rand-int 50) 25) (- (rand-int 100) 50) (- (rand-int 50) 25)]
+                :rotation [0 0 0]
+                :scale (rand 4)})
+             (range 250))]
+       [:> rapier/InstancedRigidBodies {:instances instances :type "fixed"
+                                        }
+        [:instancedMesh {:args #js [10 10 250] :frustumCulled false}
+         [:boxGeometry {:args #js [1 1 1]}]
+         [:meshStandardMaterial {:color "#ccc"}]]])
+     ]
+     
+     }
+
+
    })
+
+
+(def world
+  {
+   [0 0]
+   {:title "Main Square"
+    :ost "/ost/lounge_music_3.mp3"
+    :objects
+    (let [seed (new default "mainsquare")
+          prand-int (fn [x y] (.nextInt seed x y))
+          prand (fn [x y] (.next prando x y))
+           ]
+    [:<>
+     (model/object
+           {:position [0 -5 0]
+            ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
+            :scale 0.2
+            :src "/maps/throne_room.glb"})
+     
+     [:> drei/Sky {:turbidity 10 :rayleigh 3 :mieCoefficient 0.005 :mieDirectionalG 0.7 :elevation 21.4 :azimuth 180 :exposure 0.5}]
+     [:hemisphereLight {:position [0 100 0] :color "#fff" :groundColor "#ddd"}]
+     [:pointLight {:decay 0 :intensity 2 :position [0 300 0]}]
+
+     [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} 
+      [:> drei/Box {:args [600 5 600] :position [0 -5 0] :rotation [0 0 0]}
+       [:meshStandardMaterial {:color "#ddd"}]]]
+    
+     ])}
+
+   [1 0]
+   {:title "Beginner Houses"
+    :ost "/ost/lounge_music_2.mp3"
+    :objects
+    (let [seed (new default "beginnerhouses")
+          prand-int (fn [x y] (.nextInt seed x y))
+          prand (fn [x y] (.next prando x y))
+          instances 
+           (mapv
+             (fn [i]
+               {:key (str "key"i)
+                :position [(- (prand-int 0 50) 25) (- (prand-int 0 100) 50) (- (prand-int 0 50) 25)]
+                :rotation [0 0 0]
+                :scale (prand 0 4)})
+             (range 250))]
+    [:<>
+     (model/object
+           {:position [0 0 0]
+            ;:rotation [(/ (- (.-PI js/Math)) 2) 0 0]
+            :scale 10
+            :src "/maps/terrain.glb"})
+     
+     [:> drei/Stars {:radius 300 :depth 100 :count 20000 :factor 15 :saturation 0 :fade "fade" :speed 0.01 :frustumCulled false :logarithmicDepthBuffer true}]
+     ;[:> drei/Sky {:turbidity 10 :rayleigh 3 :mieCoefficient 0.005 :mieDirectionalG 0.7 :elevation 21.4 :azimuth 180 :exposure 0.5}]
+     [:hemisphereLight {:position [0 100 0] :color "#fff" :groundColor "#333"}]
+     [:pointLight {:decay 0 :intensity 0.2 :position [0 300 0]}]
+
+     [:> rapier/RigidBody {:colliders "trimesh" :type "fixed"} 
+      [:> drei/Box {:args [600 5 600] :position [0 0 0] :rotation [0 0 0]}
+       [:meshStandardMaterial {:color "#000"}]]]
+    
+       [:> rapier/InstancedRigidBodies {:instances instances :type "fixed"
+                                        }
+        [:instancedMesh {:args [10 10 250] :frustumCulled false}
+         [:boxGeometry {:args [1 1 1]}]
+         [:meshStandardMaterial {:color "#333"}]]]
+     ])}
+
+   
+   }
+  )

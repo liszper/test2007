@@ -1,11 +1,11 @@
 
 (ns main.component
-  (:require [main.maps :refer [maps]]
+  (:require [main.maps :refer [maps world]]
             [main.models :refer [loading avatars] :as model]
             [main.wagmi :refer [connect-kit]]
             [main.guild :refer [join-guild]]
     
-            ["@mantine/core" :refer [AppShell Modal Avatar Badge Burger Button createTheme Group SimpleGrid Grid Container Flex Stack Skeleton]]
+            ["@mantine/core" :refer [AppShell Modal Avatar Badge Burger Button createTheme Group Center SimpleGrid SimpleGrid Grid Container Flex Stack Skeleton]]
             ["@mantine/hooks" :refer [useDisclosure]]
             ["@tabler/icons-react" :as icon]
 
@@ -15,6 +15,7 @@
             ["wagmi" :as wagmi]
             
             ["three" :as three]
+            ;["three/addons/renderers/webgpu/WebGPURenderer.js" :refer [WebGPURenderer]]
             ["@react-three/fiber" :as fiber]
             ["@react-three/drei" :as drei]
             ["@react-three/rapier" :as rapier]
@@ -53,9 +54,13 @@
           (dispatch [:send {:id "movement" :player new-state}]))))))
 
 (defn player []
-  ;(react/useEffect (fn [] (js/console.log "Player component rendered.."))) 
-  (let [{:keys [nickname avatar] :as player} @(subscribe [:get-in [:player]])
-        wrapper (react/useRef)]
+  (react/useEffect (fn [] (js/console.log "Player component rendered.."))) 
+  (let [
+        {:keys [nickname avatar] :as player} @(subscribe [:get-in [:player]])
+        avatar @(subscribe [:get-in [:player :avatar]])
+        nickname @(subscribe [:get-in [:player :nickname]])
+        wrapper (react/useRef)
+        ]
     (fiber/useFrame (record-player-movement wrapper player))
     [:group {:ref wrapper}
      [model/player
@@ -103,11 +108,21 @@
   (let [
         _ @(subscribe [:get-in [:update-physics?]])
         springK @(subscribe [:get-in [:player :avatar :springK]])
+        dampingC @(subscribe [:get-in [:player :avatar :dampingC]])
         environment-map @(subscribe [:get-in [:player :located]])
-        {:keys [dynamic-environment skybox lights gltf ost control objects]} (get maps environment-map)
+        {:keys [dynamic-environment skybox lights gltf ost control objects]} (get world environment-map);(get maps environment-map)
         music-play (when ost (new Howl #js {:src (clj->js ost) :loop true :autoplay true}))
         ]  
-    [:> fiber/Canvas {:key environment-map :name environment-map :shadows "shadows" :onPointerDown (fn [e] (.requestPointerLock (.-target e)))}
+    [:> fiber/Canvas {:key environment-map 
+                      :name environment-map 
+                      :shadows "shadows" 
+                      :onPointerDown (fn [e] (.requestPointerLock (.-target e)))
+                      ;:gl (fn [canvas] (let [r (new WebGPURenderer {:canvas canvas})] r))
+				;r.xr = {
+			;		addEventListener: () => {},
+		;			removeEventListener: () => {},
+		;		}
+                      }
      [:> react/Suspense {:fallback (reagent.core/as-element [loading])}
         skybox
         lights
@@ -125,6 +140,7 @@
                   :debug debug?
                   ;:followLight true
                   :springK (or springK 1.2)
+                  :dampingC (or dampingC 0.08)
                   :controllerKeys {:forward 12 :backward 13 :leftward 14 :rightward 15 :jump 2}
                   )
            [:f> player]
@@ -172,13 +188,54 @@
    ]]
   )
 
+
+(defn status-panel []
+  (let [
+        nickname @(subscribe [:get-in [:player :nickname]])
+        located @(subscribe [:get-in [:player :located]])
+        others @(subscribe [:get-in [:players located]])
+        {:keys [nickname avatar] :as player} @(subscribe [:get-in [:player]])
+        live-players-count (inc (count others))
+        north [(inc (first located)) (second located)]
+        west [(first located) (dec (second located))]
+        east [(first located) (inc (second located))]
+        south [(dec (first located)) (second located)]
+        north-west [(dec (first located)) (inc (second located))]
+        north-east [(inc (first located)) (inc (second located))]
+        south-west [(dec (first located)) (dec (second located))]
+        south-east [(dec (first located)) (inc (second located))]
+        ]
+    [:div
+     [:p "Coordinates: "(str located)]
+     [:p (cond (= 1 live-players-count) "Only you are online."
+           :else (str live-players-count" players are online."))]
+     ;[:p (str player)]
+     [:> SimpleGrid {:cols 3}
+      (for [direction [north-west north north-east west located east south-west south south-east]]
+        (let [title (get-in world [direction :title])]
+          [:> Center {:key (rand)} 
+           (if title title "...")]
+          )
+        )
+      ]
+     [:div {:style {:display "grid" :grid-template-areas "\". north .\" \"west . east\"\". south .\""}}
+     [:> Button {:onClick #(when (get world north) (dispatch [:assoc-in [:player :located] north]))
+                 :style {:grid-area "north"}
+                 :data-disabled (when-not (get world north) true)} "Go North"]
+     [:> Button {:onClick #(when (get world west) (dispatch [:assoc-in [:player :located] west]))
+                 :style {:grid-area "west"}
+                 :data-disabled (when-not (get world west) true)} "Go West"]
+     [:> Button {:onClick #(when (get world east) (dispatch [:assoc-in [:player :located] east]))
+                 :style {:grid-area "east"}
+                 :data-disabled (when-not (get world east) true)} "Go East"]
+     [:> Button {:onClick #(when (get world south) (dispatch [:assoc-in [:player :located] south]))
+                 :style {:grid-area "south"}
+                 :data-disabled (when-not (get world south) true)} "Go South"]
+      ]
+     ]))
+
 (defn main []
-  ;(react/useEffect (fn [] (js/console.log "Main component rendered.."))) 
   (let [{:keys [address status chain chainId]} (js->clj (wagmi/useAccount) :keywordize-keys true)
-        _ (dispatch [:assoc-in [:status] status])
-        _ (when (= status "connected") (.stop lobby-music))
-        _ (dispatch [:assoc-in [:chain] chain])
-        _ (dispatch [:assoc-in [:player :located] (:name chain)])
         connect (.-connect (wagmi/useConnect))
         disconnect (.-disconnect (wagmi/useDisconnect))
         connectors (.-connectors (wagmi/useConnect))
@@ -191,8 +248,16 @@
         avatar @(subscribe [:get-in [:player :avatar :name]])
         ;{:keys [located x y z qx qy qz qw]} @(subscribe [:get-in [:player]])
         ]
-        [:> Grid
-         [:> (.-Col Grid) {:span 8 :style {:position "fixed" :top 0 :left 0 :width "70vw" :background "black" :height "100vh" :padding 0}}
+    (react/useEffect
+      (fn []
+        (dispatch [:assoc-in [:status] status])
+        (when (= status "connected") (.stop lobby-music))
+        (dispatch [:assoc-in [:chain] chain])
+        ;(dispatch [:assoc-in [:player :located] (:name chain)])
+        (when-not located (dispatch [:assoc-in [:player :located] [0 0]]))
+        (js/console.log "Main component rendered.."))) 
+    [:> Grid
+     [:> (.-Col Grid) {:span 8 :style {:position "fixed" :top 0 :left 0 :width "70vw" :background "black" :height "100vh" :padding 0}}
 
           ;[canvas-test]
           (case status
@@ -202,7 +267,7 @@
             [:div "Sign-in First!"])
 
           ]
-         [:> (.-Col Grid) {:span 4 :style {:position "absolute" :top 0 :right 0 :width "34vw"}}
+         [:> (.-Col Grid) {:span 4 :style {:position "fixed" :top 0 :right 0 :width "34vw"}}
           
           [:> Modal {:opened (and (not= status "connected") (not tos?))
                      :onClose (fn []
@@ -212,7 +277,7 @@
           
           [:> Stack {:align "stretch" :h "100%" :justify "space-between"}
          
-           ;[:h1 (get chain :name)] 
+           [:f> status-panel]
            ;(when debug? 
              ;[:h4 "Position: x:"x" y:"y" z:"z]
              ;)
@@ -221,10 +286,11 @@
            ;[:h4 "Quaternion: x:"qx" y:"qy" z:"qz" w:"qw]
            [:f> connect-kit]
            (when (and (= status "connected") (nil? guild-data)) [:> Button {:onClick #(join-guild)} "Join the Onchain guild"])
-           (case avatar
-             :wizard [:> Button {:onClick #(dispatch [:assoc-in [:player :avatar] (:ghost avatars)])} "Turn into a Ghost"]
-             :ghost [:> Button {:onClick #(dispatch [:assoc-in [:player :avatar] (:wizard avatars)])} "Become a Wizard again"]
-             nil)
+           (when (= status "connected")
+             (case avatar
+              :wizard [:> Button {:onClick #(dispatch [:assoc-in [:player :avatar] (:ghost avatars)])} "Turn into a Ghost"]
+              :ghost [:> Button {:onClick #(dispatch [:assoc-in [:player :avatar] (:wizard avatars)])} "Become a Wizard again"]
+              nil))
            ;(str guild-data)
        
            (when (and (= status "connected") guild-data) [:h1 "Skills"])

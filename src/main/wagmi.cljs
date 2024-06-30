@@ -9,6 +9,7 @@
             ["wagmi/chains" :refer [mainnet base optimism polygon]]
             ["wagmi/connectors" :refer [injected metaMask safe walletConnect coinbaseWallet]]
             ["@tanstack/react-query" :as tanstack]
+            
             ["@mantine/core" :refer [MantineProvider AppShell Avatar Badge Burger Button createTheme Group SimpleGrid Grid Container Flex Stack Skeleton]]
             ["@mantine/hooks" :refer [useDisclosure]]
             ["@tabler/icons-react" :as icon]
@@ -26,15 +27,13 @@
          :connectors #js [(injected) (walletConnect #js {:projectId wallet-connect-project-id}) (coinbaseWallet)]
          :transports #js {"1" (wagmi/http)}}))
 
-(defn bundle [child];& children]
-  [:> MantineProvider
+(defn provider [child];& children]
    [:> wagmi/WagmiProvider {:config config}
     [:> tanstack/QueryClientProvider {:client query-client}
      ;[:> airstack/AirstackProvider {:apiKey ""}
       child
-      ;[:<> children]
       ;]
-     ]]])
+     ]])
 
 
 (defn connect-kit []

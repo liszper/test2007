@@ -152,6 +152,6 @@ Instants: #inst \"2013-02-26\"")
    :guide "Think about if you have ever eaten a spider."})
 
 (defn experiment []
-  ;(self-reflect newest-challenge)
-  (js/console.log (str (m/run* [q] (membero q '(:cat :dog :bird :bat :zebra)))))
+  (self-reflect new-challenge)
+  ;(js/console.log (str (m/run* [q] (membero q '(:cat :dog :bird :bat :zebra)))))
   )

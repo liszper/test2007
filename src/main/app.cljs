@@ -1,14 +1,15 @@
 
 (ns main.app
-  (:require [main.wagmi :refer [bundle]]
+  (:require [main.wagmi :as wagmi]
             [main.guild :refer [Guild]]
             [main.models :refer [avatars]]
             
             [reagent.core :as reagent]
-            [reagent.dom  :as reagent-dom] 
             [reagent.dom.client :as rdc]
             [re-frame.core :as rf :refer [subscribe dispatch]]
             ["react-error-boundary" :refer [ErrorBoundary]]
+            
+            ["@mantine/core" :refer [MantineProvider]]
     
             ["ws" :as WebSocket]
             [cognitect.transit :as t]
@@ -16,7 +17,7 @@
             [main.component :refer [main debug?]]))
 
 
-
+; App db
 
 
 (rf/reg-event-db :reset (fn [_ [_ value]] value))
@@ -36,22 +37,21 @@
 (rf/reg-event-fx :wait (fn [{db :db} [_ opts]] {:wait (assoc opts :db db)}))
 
 
+; App providers, render, reload
 
 
+(defn app []
+  [:> ErrorBoundary {:FallbackComponent (fn [info] (reagent.core/as-element [:p {:style {:color :red}} (str (.-error info))]))}    
+   [:> MantineProvider
+    [:f> wagmi/provider
+     [:f> main]]]])
 
-(defn react-error-handler [info] [:p {:style {:color :red}} (str (.-error info))])
-
-(defn render-fn []
-  [:> ErrorBoundary {:FallbackComponent (fn [info] (reagent.core/as-element [react-error-handler info]))}    
-   [:f> bundle
-    [:f> main]]])
-
-(defn render [] (reagent-dom/render [render-fn] (.getElementById js/document "app")))
+(defn render [] (-> "app" js/document.getElementById rdc/create-root (rdc/render [app])))
 
 (defn ^:dev/after-load clear-cache-and-render! [] (rf/clear-subscription-cache!) (render))
 
 
-
+; Websocket handler
 
 
 (def websocket (atom nil))
@@ -71,11 +71,10 @@
     (set! (.-onerror ws) (.-error js/console))))
 
 
+; App init
 
 
-
-
-(def default-db-state
+(def default-db-state 
   {:player {:avatar (:wizard avatars)}})
 
 (defn ^:export init []
