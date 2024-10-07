@@ -25,7 +25,14 @@
    
    ["@guildxyz/sdk" :as guild]
    
-   ))
+   [main.audio :as audio]))
+
+(defn welcome-modal [tos? status]
+  [:> Modal {:opened (and (not= status "connected") (not tos?))
+             :onClose (fn []
+                        (audio/initialize-music ["/ost/through_the_ether.mp3"])
+                        (dispatch [:assoc-in [:tos?] true])) :title "Disclaimer" :centered "centered"}
+   [:p "Adventure.io is an experimental onchain game engine made by the team at " [:a {:href "https://guild.xyz" :target "_blank"} "Guild.xyz"]]])
 
 (defn lobby [debug?] 
   [:> fiber/Canvas {:shadows "shadows"}

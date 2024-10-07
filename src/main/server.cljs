@@ -1,6 +1,6 @@
 
 (ns main.server
-  (:require [main.npc :refer [llama3 ask-edn ask-json experiment]]
+  (:require [main.server.npc :refer [llama3 ask-edn ask-json experiment]]
             ;[main.worlds :refer [worlds]]
             ["node:process" :as process]
             ["express" :as express]

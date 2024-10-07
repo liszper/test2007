@@ -27,7 +27,7 @@
 
    [main.components.player :refer [player]]
    [main.components.others :refer [other-players]]
-   ))
+   [main.audio :as audio]))
 
 (def animation-set
   {:idle "Idle",
@@ -56,7 +56,19 @@
         dampingC @(subscribe [:get-in [:player :avatar :dampingC]])
         environment-map @(subscribe [:get-in [:player :located]])
         {:keys [dynamic-environment skybox lights gltf ost control objects]} (get maps environment-map)
-        music-play (when ost (new Howl #js {:src (clj->js ost) :loop true :autoplay true}))]
+        prev-environment-ref (react/useRef nil)] 
+    
+    (react/useEffect
+     (fn []
+       (when (not= environment-map (.-current prev-environment-ref))
+         (set! (.-current prev-environment-ref) environment-map)
+         (when ost
+           (audio/change-music ost)))
+       
+       ;; Cleanup function
+       #(audio/stop-music))
+     #js [environment-map])
+    
     [:> fiber/Canvas {:key environment-map
                       :name environment-map
                       :shadows "shadows"

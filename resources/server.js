@@ -1470,7 +1470,7 @@ SHADOW_IMPORT("cljs.core.async.impl.ioc_helpers.js");
 SHADOW_IMPORT("cljs.core.async.js");
 SHADOW_IMPORT("cljs.core.async.interop.js");
 SHADOW_IMPORT("cljs.core.logic.js");
-SHADOW_IMPORT("main.npc.js");
+SHADOW_IMPORT("main.server.npc.js");
 SHADOW_IMPORT("shadow.js.shim.module$node_process.js");
 SHADOW_IMPORT("shadow.js.shim.module$express.js");
 SHADOW_IMPORT("shadow.js.shim.module$http.js");

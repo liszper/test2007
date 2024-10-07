@@ -16,8 +16,7 @@
 
    ["../ecmascript/threejs" :refer [Box]]
 
-   [main.components.welcome :refer [welcome-modal]]
-   [main.views.lobby :refer [lobby]]
+   [main.views.lobby :refer [lobby welcome-modal]]
    [main.views.canvas :refer [canvas]]
    [main.components.dashboard :refer [dashboard]]))
 
