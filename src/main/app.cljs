@@ -1,28 +1,74 @@
-
 (ns main.app
-  (:require [main.wagmi :as wagmi]
-            [main.guild :refer [Guild]]
-            [main.models :refer [avatars]]
-            
-            [reagent.core :as reagent]
-            [reagent.dom.client :as rdc]
-            [re-frame.core :as rf :refer [subscribe dispatch]]
-            ["react-error-boundary" :refer [ErrorBoundary]]
-            
-            ["@mantine/core" :refer [MantineProvider]]
-    
-            ["ws" :as WebSocket]
-            [cognitect.transit :as t]
+  (:require
+   [main.wagmi :refer [provider]]
+   ["wagmi" :as wagmi]
+   [main.models :refer [avatars]]
 
-            [main.component :refer [main debug?]]))
+   [reagent.core :as reagent]
+   [reagent.dom.client :as rdc]
+   [re-frame.core :as rf :refer [dispatch subscribe]]
+   ["react" :as react]
+   ["react-error-boundary" :refer [ErrorBoundary]]
 
+   [cognitect.transit :as t]
+
+   ["@mantine/core" :refer [MantineProvider AppShell Modal Avatar Badge Burger Button createTheme Group Center SimpleGrid SimpleGrid Grid Container Flex Stack Skeleton]]
+
+   ["../ecmascript/threejs" :refer [Box]]
+
+   [main.components.welcome :refer [welcome-modal]]
+   [main.views.lobby :refer [lobby]]
+   [main.views.canvas :refer [canvas]]
+   [main.components.dashboard :refer [dashboard]]))
+
+
+(set! *warn-on-infer* false)
+
+(defonce debug? false)
+
+(defn use-account-effect [status chain located]
+  (react/useEffect
+   (fn []
+     (dispatch [:assoc-in [:status] status])
+     (dispatch [:assoc-in [:chain] chain])
+     (dispatch [:assoc-in [:player :located] (:name chain)])
+     (when-not located (dispatch [:assoc-in [:player :located] [0 0]]))
+     (fn []))
+   #js [status chain located]))
+
+(defn left-column [status]
+  [:> (.-Col Grid) {:span 8 :style {:position "fixed" :top 0 :left 0 :width "70vw" :background "black" :height "100vh" :padding 0}}
+   (case status
+     "connected" [:f> canvas debug?]
+     "disconnected" [:f> lobby debug?]
+     "connecting" [:f> lobby debug?]
+     [:div "Sign-in First!"])])
+
+(defn right-column [tos? status]
+  [:> (.-Col Grid) {:span 4 :style {:position "fixed" :top 0 :right 0 :width "34vw"}}
+   (welcome-modal tos? status)
+   [dashboard]])
+
+(defn main []
+  (let [{:keys [status chain]} (js->clj (wagmi/useAccount) :keywordize-keys true)
+        tos? @(subscribe [:get-in [:tos?]])
+        {:keys [located]} @(subscribe [:get-in [:player]])]
+    (use-account-effect status chain located)
+    [:> Grid
+     [left-column status]
+     [right-column tos? status]]))
 
 ; App db
 
 
 (rf/reg-event-db :reset (fn [_ [_ value]] value))
 (rf/reg-event-db :assoc-in (fn [db [_ path value]] (assoc-in db path value)))
-(rf/reg-event-db :init-in (fn [db [_ path value]] (if-not (get-in db path) (let [] (js/console.log "init: "(str path)) (assoc-in db path value)) db)))
+(rf/reg-event-db :init-in (fn [db [_ path value]]
+  (if-not (get-in db path)
+    (do
+      (js/console.log "init: " (str path))
+      (assoc-in db path value))
+    db)))
 
 (rf/reg-sub :get-in (fn [db [_ path]] (get-in db path)))
 
@@ -43,7 +89,7 @@
 (defn app []
   [:> ErrorBoundary {:FallbackComponent (fn [info] (reagent.core/as-element [:p {:style {:color :red}} (str (.-error info))]))}    
    [:> MantineProvider
-    [:f> wagmi/provider
+    [:f> provider
      [:f> main]]]])
 
 (defn render [] (-> "app" js/document.getElementById rdc/create-root (rdc/render [app])))
